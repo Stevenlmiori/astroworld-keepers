@@ -260,10 +260,10 @@ footer a{color:var(--primary)}
           <th data-k="n">Player <span class="ar">▼</span></th>
           <th data-k="p">Pos <span class="ar">▼</span></th>
           <th data-k="t">Fantasy team <span class="ar">▼</span></th>
-          <th data-k="fp" class="r">FP rank <span class="ar">▼</span></th>
+          <th data-k="fp" class="r" title="FantasyPros overall consensus rank. It is a market ordering that blends every position together, NOT a value scale — do not read it against the pick slot. A player ranked 11th overall is not automatically worth the 10th pick, because a top-4 RB and a top-9 WR sit at very different scarcity. The Value column is the honest number.">FP rank <span class="ar">▼</span></th>
           <th data-k="cp" class="r">'26 Pick Slot <span class="ar">▼</span></th>
           <th data-k="gain" class="r">Pts gained <span class="ar">▼</span></th>
-          <th data-k="v" class="r">Value <span class="ar">▼</span></th>
+          <th data-k="v" class="r" title="Projected fantasy points this player scores above the last startable player at HIS position. This is the number that actually matters — it already accounts for the fact that your lineup starts three WR but only two RB, so receivers run deeper and are easier to replace.">Value <span class="ar">▼</span></th>
           <th data-k="r25" class="r">2025 rd <span class="ar">▼</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
@@ -292,6 +292,11 @@ footer a{color:var(--primary)}
           of the draft, because pick 13 still lands an excellent player. So instead the model simulates the
           board: it removes all twelve kept players, accounts for the picks those keepers consume, and reads off
           who is actually still there.</p>
+        <p>This is why <b>FP rank and pick slot should never be read against each other</b>. Jonathan Taylor is
+          ranked 11th and costs pick 10, which looks like paying full price — but he is <b>RB4</b>, and the best
+          player left at pick 10 is a <b>WR9</b>. With three WR starting slots and two RB, receivers run far
+          deeper, so the ninth-best WR is much easier to replace than the fourth-best RB. Same neighbourhood on
+          the consensus board, forty-four points apart in what they actually win you.</p>
         <div class="formula">points gained = value(your keeper) − value(best player left at that pick)</div>
         <p style="margin-top:12px">Those points are then stretched onto a <b>0–100 rating</b>, so the number
           is the grade: 90s are an A, 80s a B, 70s a C, 60s a D, and anything in the 50s or below is an F.
