@@ -171,6 +171,7 @@ tbody tr.inel{opacity:.5}
 td.r{text-align:right}
 .pname{font-weight:500}
 .pteam{font-size:12px;color:var(--on-var)}
+.posinline{display:none}
 .scorecell{font-weight:600}
 .mini{display:inline-block;width:56px;height:6px;border-radius:3px;background:var(--sc-highest);
   vertical-align:middle;margin-left:8px;overflow:hidden;position:relative}
@@ -206,6 +207,27 @@ td.r{text-align:right}
 
 footer{border-top:1px solid var(--outline-var);margin-top:24px;padding:26px 0 44px;color:var(--on-var);font-size:12.5px}
 footer a{color:var(--primary)}
+/* Phones: the bar costs more width than it earns, so drop it and let the rating
+   number carry the colour itself. That frees the Fantasy Team column into view. */
+@media (max-width:700px){
+  .mini{display:none}
+  .rt{font-weight:700}
+  .rt.r-Ap,.rt.r-A,.rt.r-B{color:var(--good)}
+  .rt.r-C,.rt.r-D{color:var(--warn)}
+  .rt.r-F{color:var(--bad)}
+  /* hide Grade (2) and Pos (4); the coloured rating carries the grade and the
+     position rank moves inline next to the player's name */
+  #tbl thead th:nth-child(2),#tbl tbody td:nth-child(2),
+  #tbl thead th:nth-child(4),#tbl tbody td:nth-child(4){display:none}
+  .posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;
+    letter-spacing:.03em;color:var(--on-var)}
+  /* the NFL abbreviation is the least useful thing here on a phone; the fantasy
+     team is what you are scanning for, so give it the width instead */
+  #tbl tbody td:nth-child(3) .pteam{display:none}
+  table{min-width:560px}
+  thead th,tbody td{padding-left:9px;padding-right:9px}
+  tbody td{font-size:13.5px}
+}
 @media (max-width:860px){
   .grid2{grid-template-columns:1fr}
   .hero{padding-top:30px}
@@ -374,6 +396,7 @@ const tvar = t => `class="tcolor" style="--h:${hueOf[t]}"`;
 const bestByTeam = teams.map(t => eligible.filter(p => p.t === t).sort((a, b) => b.s - a.s)[0])
                         .sort((a, b) => b.s - a.s);
 const gradeClass = g => 'g-' + (g === 'A+' ? 'Ap' : g);
+const rateClass = g => 'r-' + (g === 'A+' ? 'Ap' : g);
 const WHY = { rd1: "1st rd '25", kept25: "Kept '25" };
 const STABLE = DATA.stable || {}, RIVAL = DATA.rival || {};
 const KEPT = new Set(DATA.kept || []);
@@ -421,9 +444,9 @@ function rowHTML(p) {
   const w = Math.min(100, 100 * Math.abs(g) / maxGain);
   const bar = p.e ? `<span class="mini"><i class="${g < 0 ? 'neg' : ''}" style="width:${w}%"></i></span>` : '';
   return `<tr class="tcolor ${p.e ? '' : 'inel'}" style="--h:${hueOf[p.t]}">
-    <td class="scorecell num">${p.e ? p.s : '—'}${bar}</td>
+    <td class="scorecell num"><span class="rt ${p.e ? rateClass(p.g) : ''}">${p.e ? p.s : '—'}</span>${bar}</td>
     <td>${p.e ? `<span class="chip ${gradeClass(p.g)}">${p.g}</span>` : `<span class="chip lock">${WHY[p.why]}</span>`}</td>
-    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span></td>
+    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span><span class="posinline">${p.p}${p.posrk ?? ''}</span></td>
     <td><span class="pos">${p.p}${p.posrk ?? ''}</span></td>
     <td class="teamcell"><span class="tdot"></span>${esc(p.t)}</td>
     <td class="r num">${p.ar ?? '—'}</td>
