@@ -44,6 +44,7 @@
   --tl:80%; --tc:.14;
 }
 *{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:clip}
 body{
   margin:0; background:var(--surface); color:var(--on-surface);
   font-family:"Roboto","Roboto Flex",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -85,7 +86,8 @@ section{padding:40px 0}
 .sechead p{margin:0;color:var(--on-var);font-size:14.5px;max-width:72ch}
 
 /* ---- team cards ---- */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(268px,100%),1fr));gap:14px}
+.cards>*{min-width:0}
 .card{background:var(--sc);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:2px;
   position:relative;overflow:hidden;transition:box-shadow .18s, transform .18s;border:1px solid transparent}
 .card:hover{box-shadow:var(--shadow-2)}
@@ -180,25 +182,31 @@ td.r{text-align:right}
 
 /* ---- explainer ---- */
 .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
-.panel{border:none;border-radius:20px;padding:22px 24px;background:var(--sc)}
+.grid2>*{min-width:0}
+.panel{border:none;border-radius:20px;padding:22px 24px;background:var(--sc);min-width:0}
+.panel>*{min-width:0;max-width:100%}
 .panel h4{margin:0 0 10px;font-size:15px;font-weight:600;font-family:"Roboto Flex"}
 .panel p{margin:0 0 12px;color:var(--on-var);font-size:14px}
 .formula{background:var(--sc-high);border-radius:12px;padding:14px 16px;font-family:"Roboto Mono",monospace;
-  font-size:12.5px;line-height:1.7;color:var(--on-surface);overflow-x:auto;white-space:pre}
+  font-size:12.5px;line-height:1.7;color:var(--on-surface);overflow-x:auto;
+  -webkit-overflow-scrolling:touch;white-space:pre;max-width:100%}
 .rules{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
 .rules li{display:flex;gap:12px;font-size:14px;color:var(--on-var)}
 .rules b{color:var(--on-surface);font-weight:500}
 .rules .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--s-container);color:var(--on-surface);
   display:grid;place-items:center;font-size:11px;font-weight:700;font-family:"Roboto Mono"}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.clegend{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 10px;font-size:11.5px;color:var(--on-var)}
+.clegend{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 10px;font-size:11.5px;color:var(--on-var);max-width:100%}
+#curve{min-width:0;max-width:100%}
+#curve svg{display:block;width:100%;max-width:100%;height:auto}
 .clegend span{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--on-surface)}
 .clegend i{width:12px;height:3px;border-radius:2px;display:inline-block}
 .clegend b{font-weight:400;color:var(--on-var)}
 .legend span{font-size:11.5px;color:var(--on-var)}
 
 /* ---- lists ---- */
-.ilist.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));column-gap:28px}
+.ilist.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr));column-gap:28px}
+.ilist.cols>*{min-width:0}
 .ilist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column}
 .ilist li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--outline-var);font-size:14px}
 .ilist li:last-child{border-bottom:none}
