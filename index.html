@@ -463,7 +463,9 @@ function render() {
 document.querySelectorAll('#tbl thead th').forEach(th => th.addEventListener('click', () => {
   const k = th.dataset.k;
   if (sortK === k) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
-  else { sortK = k; sortDir = ['n', 't', 'p'].includes(k) ? 'asc' : 'desc'; }
+  // rank-like and text columns open ascending (rank 1 / pick 1 / A-Z first);
+  // score-like columns open descending (biggest first)
+  else { sortK = k; sortDir = ['n', 't', 'p', 'ar', 'fp', 'cp', 'r25'].includes(k) ? 'asc' : 'desc'; }
   document.querySelectorAll('#tbl thead th').forEach(o => o.removeAttribute('data-dir'));
   th.dataset.dir = sortDir;
   th.querySelector('.ar').textContent = sortDir === 'desc' ? '▼' : '▲';
