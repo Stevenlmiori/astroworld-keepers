@@ -314,11 +314,10 @@ footer a{color:var(--primary)}
         <h4 style="margin-top:20px">Where this is soft</h4>
         <p>Late picks are valued at zero, which flatters deep keepers — real late picks are lottery tickets.
           Projections can't price suspensions or injuries.</p>
-        <p style="margin-bottom:0">A <span class="chip lock">tied with …</span> tag marks the two players a
-          team is genuinely choosing between. It appears when re-running the whole model under different
-          assumptions about how deep startable players run at each position keeps swapping which of the two
-          comes out ahead — the model admitting it cannot separate them. Treat the pair as level and decide on
-          gut, or on who you trust to stay healthy. Four of the twelve teams have one.</p>
+        <p style="margin-bottom:0">Four of the twelve teams are a genuine <b>tie</b>: re-running the whole
+          model under different assumptions about how deep startable players run at each position keeps
+          swapping which of their top two comes out ahead. Those teams are called out on the cards at the
+          bottom of the page. Treat the pair as level and decide on gut, or on who you trust to stay healthy.</p>
       </div>
     </div>
   </section>
@@ -394,10 +393,6 @@ function tiedWith(p) {
 const TIETIP = (p, other) => `${esc(p.n)} and ${esc(other)} score close enough that the model cannot `
   + `separate them — which one comes out ahead flips depending on how deep you assume startable players `
   + `run at each position. Treat them as tied and pick on gut, or on who you trust to stay healthy.`;
-const tieChip = p => {
-  const other = tiedWith(p);
-  return other ? ` <span class="chip lock" title="${TIETIP(p, other)}">tied with ${esc(other)}</span>` : '';
-};
 
 /* ---------- team cards ---------- */
 const maxS = Math.max(bestByTeam[0].gain ?? 1, 1);
@@ -428,7 +423,7 @@ function rowHTML(p) {
   return `<tr class="tcolor ${p.e ? '' : 'inel'}" style="--h:${hueOf[p.t]}">
     <td class="scorecell num">${p.e ? p.s : '—'}${bar}</td>
     <td>${p.e ? `<span class="chip ${gradeClass(p.g)}">${p.g}</span>` : `<span class="chip lock">${WHY[p.why]}</span>`}</td>
-    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${tieChip(p)}</td>
+    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span></td>
     <td><span class="pos">${p.p}${p.posrk ?? ''}</span></td>
     <td class="teamcell"><span class="tdot"></span>${esc(p.t)}</td>
     <td class="r num">${p.ar ?? '—'}</td>
