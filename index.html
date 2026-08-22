@@ -89,10 +89,10 @@ section{padding:40px 0}
 .card{background:var(--sc);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:2px;
   position:relative;overflow:hidden;transition:box-shadow .18s, transform .18s;border:1px solid transparent}
 .card:hover{box-shadow:var(--shadow-2)}
-.card.top{background:color-mix(in srgb,var(--tk) 16%,var(--sc));border-left-width:6px}
+
 .card .rk{position:absolute;top:14px;right:16px;font-size:11px;font-weight:600;letter-spacing:.08em;
   color:var(--on-var);opacity:.7}
-.card.top .rk{color:var(--on-var);opacity:.9}
+
 .card .tm{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--on-var);font-weight:500;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:34px}
 
@@ -130,9 +130,9 @@ tbody tr td:first-child::before{content:"";position:absolute;left:0;top:0;bottom
 tbody tr.inel td:first-child::before{background:var(--outline-var)}
 .card{border-left:4px solid var(--tk)}
 .card .tm{color:var(--tk);opacity:1}
-.card.top .tm{color:var(--tk);opacity:1}
+
 .card .bar-f{background:var(--tk)}
-.card.top .bar-f{background:var(--tk)}
+
 .ilist .tdot{margin-right:6px}
 
 /* ---- filter row ---- */
@@ -192,7 +192,7 @@ td.r{text-align:right}
 .legend span{font-size:11.5px;color:var(--on-var)}
 
 /* ---- lists ---- */
-.lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.ilist.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));column-gap:28px}
 .ilist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column}
 .ilist li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--outline-var);font-size:14px}
 .ilist li:last-child{border-bottom:none}
@@ -297,22 +297,10 @@ Keeper Score = V(FantasyPros rank) − V(keeper pick)</div>
   </section>
 
   <section id="extras">
-    <div class="lists">
-      <div class="panel">
-        <h4>Free at round 15</h4>
-        <p style="font-size:13px">Undrafted in 2025, so they cost only your final pick. Pure profit if the ranking holds.</p>
-        <ul class="ilist" id="udList"></ul>
-      </div>
-      <div class="panel">
-        <h4>Locked out</h4>
-        <p style="font-size:13px">Disqualified before the math runs — 2025 first-rounders, and players already kept once.</p>
-        <ul class="ilist" id="inelList"></ul>
-      </div>
-      <div class="panel">
-        <h4>Traps</h4>
-        <p style="font-size:13px">Big names whose keeper price is an early pick. The stars are real; the discount is not.</p>
-        <ul class="ilist" id="trapList"></ul>
-      </div>
+    <div class="panel">
+      <h4>Locked out</h4>
+      <p style="font-size:13px">Disqualified before the math runs — 2025 first-rounders, and players already kept once.</p>
+      <ul class="ilist cols" id="inelList"></ul>
     </div>
   </section>
 
@@ -365,7 +353,7 @@ const WHY = { rd1: "1st rd '25", kept25: "Kept '25" };
 /* ---------- team cards ---------- */
 const maxS = bestByTeam[0].s;
 el('cards').innerHTML = bestByTeam.map((p, i) => `
-  <div class="card tcolor${i === 0 ? ' top' : ''}" style="--h:${hueOf[p.t]}">
+  <div class="card tcolor" style="--h:${hueOf[p.t]}">
     <div class="rk">#${i + 1}</div>
     <div class="tm">${esc(p.t)}</div>
     <div class="pl">${esc(p.n)}</div>
@@ -486,15 +474,9 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawCurve)
 
 /* ---------- side lists ---------- */
 const li = (p, right) => `<li class="tcolor" style="--h:${hueOf[p.t]}"><span class="pos">${p.p}</span><span class="nm">${esc(p.n)}<span class="sm"> · <span class="tdot"></span>${esc(p.t)}</span></span>${right}</li>`;
-el('udList').innerHTML = P.filter(p => p.ud && p.fp).sort((a, b) => b.s - a.s).slice(0, 8)
-  .map(p => li(p, `<span class="chip ${gradeClass(p.g)}">${p.s}</span>`)).join('');
-const byRank = (a, b) => (a.fp ?? 999) - (b.fp ?? 999);
-const lockedTop = [...P.filter(p => p.why === 'rd1').sort(byRank).slice(0, 6),
-                   ...P.filter(p => p.why === 'kept25').sort(byRank).slice(0, 6)].sort(byRank);
-el('inelList').innerHTML = lockedTop
+el('inelList').innerHTML = P.filter(p => !p.e)
+  .sort((a, b) => (a.fp ?? 999) - (b.fp ?? 999))
   .map(p => li(p, `<span class="chip lock">${WHY[p.why]}</span>`)).join('');
-el('trapList').innerHTML = eligible.filter(p => p.cr <= 6).sort((a, b) => a.s - b.s).slice(0, 8)
-  .map(p => li(p, `<span class="chip ${gradeClass(p.g)}">${p.s}</span>`)).join('');
 
 el('upd').textContent = 'updated ' + DATA.updated;
 el('nexp').textContent = DATA.experts;
