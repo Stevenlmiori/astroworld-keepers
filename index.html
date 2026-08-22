@@ -264,7 +264,6 @@ footer a{color:var(--primary)}
           <th data-k="cp" class="r">'26 Pick Slot <span class="ar">▼</span></th>
           <th data-k="gain" class="r">Pts gained <span class="ar">▼</span></th>
           <th data-k="v" class="r">Value <span class="ar">▼</span></th>
-          <th data-k="alt">Instead you'd get <span class="ar">▼</span></th>
           <th data-k="r25" class="r">2025 rd <span class="ar">▼</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
@@ -420,7 +419,6 @@ function rowHTML(p) {
   const g = p.gain ?? 0;
   const w = Math.min(100, 100 * Math.abs(g) / maxGain);
   const bar = p.e ? `<span class="mini"><i class="${g < 0 ? 'neg' : ''}" style="width:${w}%"></i></span>` : '';
-  const alt = p.alt ? `${esc(p.alt)} <span class="pteam">${p.altV}</span>` : '—';
   return `<tr class="tcolor ${p.e ? '' : 'inel'}" style="--h:${hueOf[p.t]}">
     <td class="scorecell num">${p.e ? p.s : '—'}${bar}</td>
     <td>${p.e ? `<span class="chip ${gradeClass(p.g)}">${p.g}</span>` : `<span class="chip lock">${WHY[p.why]}</span>`}</td>
@@ -431,7 +429,6 @@ function rowHTML(p) {
     <td class="r num">${p.e ? p.cp : '—'}</td>
     <td class="r num">${p.gain == null ? '—' : (p.gain > 0 ? '+' : '') + p.gain.toFixed(1)}</td>
     <td class="r num">${p.v ?? '—'}</td>
-    <td class="pteam">${alt}</td>
     <td class="r num">${p.ud ? 'UDFA' : p.r25}</td>
   </tr>`;
 }
@@ -464,7 +461,7 @@ function render() {
 document.querySelectorAll('#tbl thead th').forEach(th => th.addEventListener('click', () => {
   const k = th.dataset.k;
   if (sortK === k) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
-  else { sortK = k; sortDir = ['n', 't', 'p', 'alt'].includes(k) ? 'asc' : 'desc'; }
+  else { sortK = k; sortDir = ['n', 't', 'p'].includes(k) ? 'asc' : 'desc'; }
   document.querySelectorAll('#tbl thead th').forEach(o => o.removeAttribute('data-dir'));
   th.dataset.dir = sortDir;
   th.querySelector('.ar').textContent = sortDir === 'desc' ? '▼' : '▲';
