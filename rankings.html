@@ -56,7 +56,9 @@ h1,h2,h3{font-family:"Roboto Flex","Roboto",sans-serif;text-wrap:balance;margin:
 
 /* ---- top app bar ---- */
 .bar{position:sticky;top:0;z-index:40;background:var(--sc);border-bottom:1px solid var(--outline-var);backdrop-filter:saturate(1.4)}
-.bar .wrap{display:flex;align-items:center;gap:14px;height:64px}
+.bar .wrap{display:flex;align-items:center;gap:14px;min-height:64px;padding-top:9px;padding-bottom:9px}
+.bar .wrap>div:nth-child(2){min-width:0}
+.barttl{overflow:hidden;text-overflow:ellipsis}
 .mark{width:34px;height:34px;border-radius:11px;background:var(--primary);color:var(--on-primary);
   display:grid;place-items:center;font-family:"Roboto Flex";font-weight:700;font-size:15px;flex:none;letter-spacing:-.03em}
 .barttl{font-family:"Roboto Flex","Roboto",sans-serif;font-size:19px;font-weight:500;letter-spacing:0}
@@ -231,15 +233,27 @@ footer a{color:var(--primary)}
   .rt.r-Ap,.rt.r-A,.rt.r-B{color:var(--good)}
   .rt.r-C,.rt.r-D{color:var(--warn)}
   .rt.r-F{color:var(--bad)}
-  /* hide Grade (2) and Pos (4); the coloured rating carries the grade and the
-     position rank moves inline next to the player's name */
-  #tbl thead th:nth-child(2),#tbl tbody td:nth-child(2),
-  #tbl thead th:nth-child(4),#tbl tbody td:nth-child(4){display:none}
+  /* Keeper board: hide Grade (2) and Pos (4) — the coloured rating carries the
+     grade and the position rank moves inline beside the player's name. */
+  .t-keeper thead th:nth-child(2),.t-keeper tbody td:nth-child(2),
+  .t-keeper thead th:nth-child(4),.t-keeper tbody td:nth-child(4){display:none}
+  /* Value board: hide Pos (3, shown inline), Proj pts (5) and Bye (9). */
+  .t-value thead th:nth-child(3),.t-value tbody td:nth-child(3),
+  .t-value thead th:nth-child(5),.t-value tbody td:nth-child(5),
+  .t-value thead th:nth-child(9),.t-value tbody td:nth-child(9){display:none}
+  .t-value .mini{display:none}
+  /* 513 rows means one long name sets the column width for everybody; cap it so
+     Value clears the viewport edge, and let the long ones ellipsis */
+  .t-value tbody td:nth-child(2) .pname{display:inline-block;max-width:118px;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+  .t-value tbody td,.t-value thead th{font-size:13px}
+  .barttl{font-size:17px}
   .posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;
     letter-spacing:.03em;color:var(--on-var)}
   /* the NFL abbreviation is the least useful thing here on a phone; the fantasy
      team is what you are scanning for, so give it the width instead */
-  #tbl tbody td:nth-child(3) .pteam{display:none}
+  .t-keeper tbody td:nth-child(3) .pteam{display:none}
+  .t-value tbody td:nth-child(2) .pteam{display:none}
   table{min-width:560px}
   thead th,tbody td{padding-left:9px;padding-right:9px}
   tbody td{font-size:13.5px}
@@ -258,8 +272,8 @@ footer a{color:var(--primary)}
   <div class="wrap">
     <div class="mark">AW</div>
     <div>
-      <div class="barttl">Astroworld Value Board</div>
-      <div class="sub">2026 Season &middot; Ranked for this league</div>
+      <div class="barttl">Value Board</div>
+      <div class="sub">Astroworld &middot; 2026 Season</div>
     </div>
     <div class="spacer"></div>
     <a class="navlink" href="https://stevenlmiori.github.io/astroworld-keepers/">Keepers</a>
@@ -289,9 +303,9 @@ footer a{color:var(--primary)}
       <input type="search" id="q" placeholder="Search players…" aria-label="Search players">
     </div>
     <div class="tablewrap" id="tblwrap">
-      <table id="tbl">
+      <table id="tbl" class="t-value">
         <thead><tr>
-          <th data-k="ar" data-dir="asc" class="r">Astro rank <span class="ar">▲</span></th>
+          <th data-k="ar" data-dir="asc" class="r" title="Overall rank by value in Astroworld's lineup and scoring.">Astro #<span class="ar">▲</span></th>
           <th data-k="n">Player <span class="ar">▼</span></th>
           <th data-k="p">Pos <span class="ar">▼</span></th>
           <th data-k="v" class="r">Value <span class="ar">▼</span></th>
@@ -404,8 +418,8 @@ function rowHTML(p) {
     <td class="scorecell num">${p.ar ?? '—'}</td>
     <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span><span class="posinline">${p.p}${p.posrk ?? ''}</span></td>
     <td><span class="pos">${p.p}${p.posrk ?? ''}</span></td>
-    <td class="r num">${p.v.toFixed(1)}${bar}</td>
-    <td class="r num">${p.pts ? p.pts.toFixed(1) : '—'}</td>
+    <td class="r num">${Math.round(p.v)}${bar}</td>
+    <td class="r num">${p.pts ? Math.round(p.pts) : '—'}</td>
     <td class="r num">${p.fp ?? '—'}</td>
     <td class="r num">${gapCell(p.gap)}</td>
     <td class="teamcell">${own}</td>
