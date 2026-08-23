@@ -64,10 +64,13 @@ h1,h2,h3{font-family:"Roboto Flex","Roboto",sans-serif;text-wrap:balance;margin:
 .barttl{font-family:"Roboto Flex","Roboto",sans-serif;font-size:19px;font-weight:500;letter-spacing:0}
 .bar .sub{font-size:12px;color:var(--on-var);letter-spacing:.06em;text-transform:uppercase}
 .spacer{flex:1}
-.navlink{color:var(--primary);text-decoration:none;font-size:13.5px;font-weight:500;
-  padding:8px 12px;border-radius:9px;transition:background .15s;white-space:nowrap}
-.navlink:hover{background:var(--scrim)}
-.navlink:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+/* segmented page switcher; the page you are on is the filled one */
+.pagenav{display:flex;gap:2px;background:var(--sc-high);padding:3px;border-radius:11px;flex:none}
+.pagenav a{font-size:13px;font-weight:500;color:var(--on-var);text-decoration:none;
+  padding:7px 13px;border-radius:9px;white-space:nowrap;transition:background .15s,color .15s}
+.pagenav a:hover{color:var(--on-surface);background:var(--scrim)}
+.pagenav a.active{background:var(--primary);color:var(--on-primary);font-weight:600}
+.pagenav a:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .gap{font-weight:600;font-variant-numeric:tabular-nums}
 .gap.up{color:var(--good)}
 .gap.down{color:var(--bad)}
@@ -296,6 +299,8 @@ footer a{color:var(--primary)}
     text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
   .t-value tbody td,.t-value thead th{font-size:13px}
   .barttl{font-size:17px}
+  .pagenav a{font-size:12px;padding:6px 9px}
+  .bar .wrap{gap:9px}
   .posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;
     letter-spacing:.03em;color:var(--on-var)}
   /* the NFL abbreviation is the least useful thing here on a phone; the fantasy
@@ -324,7 +329,10 @@ footer a{color:var(--primary)}
       <div class="sub">Astroworld &middot; 2026 Season</div>
     </div>
     <div class="spacer"></div>
-    <a class="navlink" href="https://stevenlmiori.github.io/astroworld-keepers/">Keepers</a>
+    <nav class="pagenav" aria-label="Pages">
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/">Keepers</a>
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/rankings.html" class="active" aria-current="page">Value Board</a>
+    </nav>
     <button class="iconbtn" id="themeBtn" aria-label="Switch color theme" title="Switch theme">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8v8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.5 4.9 4.9 3.5l2.1 2.1L5.6 7 3.5 4.9Zm13.4 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1ZM19.1 3.5l1.4 1.4L18.4 7 17 5.6l2.1-2.1ZM5.6 17l1.4 1.4-2.1 2.1-1.4-1.4L5.6 17ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/></svg>
     </button>
@@ -596,7 +604,7 @@ el('clearBtn').addEventListener('click', () => {
     el('clearBtn').textContent = `Clear all ${STATE.size}? Tap again`;
     el('clearBtn').classList.add('armed');
     clearTimeout(armTimer);
-    armTimer = setTimeout(disarmClear, 5000);
+    armTimer = setTimeout(disarmClear, 15000);
     return;
   }
   disarmClear();
