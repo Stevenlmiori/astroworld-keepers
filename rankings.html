@@ -250,6 +250,7 @@ tbody tr.mine td:first-child{box-shadow:inset 3px 0 0 var(--primary)}
 .draftcount{font-size:12.5px;color:var(--on-var);font-weight:500;white-space:nowrap}
 .fchip.danger{border-color:transparent;background:var(--bad-c);color:var(--bad)}
 .fchip.danger:hover{filter:brightness(1.06)}
+.fchip.danger.armed{background:var(--bad);color:var(--surface);font-weight:700}
 .filters .spacer{flex:1;min-width:0}
 .clegend{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 10px;font-size:11.5px;color:var(--on-var);max-width:100%}
 #curve{min-width:0;max-width:100%}
@@ -469,6 +470,7 @@ function saveState() {
   const gone = STATE.size;
   el('draftCount').textContent = gone ? `${gone} off the board · ${mine} mine` : '';
   el('clearBtn').style.display = gone ? '' : 'none';
+  if (!gone && typeof disarmClear === 'function') disarmClear();
   drawRoster();
 }
 
@@ -579,10 +581,29 @@ document.querySelectorAll('.fchip[data-view]').forEach(b => b.addEventListener('
   document.querySelectorAll('.fchip[data-view]').forEach(o => o.setAttribute('aria-pressed', 'false'));
   b.setAttribute('aria-pressed', 'true'); view = b.dataset.view; render(); el('tblwrap').scrollTop = 0;
 }));
+// Two-step inline confirm rather than confirm(): browsers suppress dialogs in
+// embedded and sandboxed contexts, which silently swallowed the clear.
+let armed = false, armTimer = null;
+function disarmClear() {
+  armed = false; clearTimeout(armTimer);
+  el('clearBtn').textContent = 'Clear drafted';
+  el('clearBtn').classList.remove('armed');
+}
 el('clearBtn').addEventListener('click', () => {
   if (!STATE.size) return;
-  if (!confirm(`Clear all ${STATE.size} players from the board? This wipes your roster too.`)) return;
+  if (!armed) {
+    armed = true;
+    el('clearBtn').textContent = `Clear all ${STATE.size}? Tap again`;
+    el('clearBtn').classList.add('armed');
+    clearTimeout(armTimer);
+    armTimer = setTimeout(disarmClear, 5000);
+    return;
+  }
+  disarmClear();
   STATE.clear(); saveState(); render();
+});
+document.addEventListener('click', e => {
+  if (armed && !e.target.closest('#clearBtn')) disarmClear();
 });
 // delegated, so marks survive every re-render from sorting and filtering
 el('tbody').addEventListener('click', e => {
