@@ -298,9 +298,11 @@ footer a{color:var(--primary)}
   .t-value tbody td:nth-child(3) .pname{display:inline-block;max-width:112px;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
   .t-value tbody td,.t-value thead th{font-size:13px}
-  .barttl{font-size:17px}
+  /* the nav needs the room more than the strapline does */
+  .bar .sub{display:none}
+  .barttl{font-size:16px;line-height:1.15}
   .pagenav a{font-size:12px;padding:6px 9px}
-  .bar .wrap{gap:9px}
+  .bar .wrap{gap:9px;min-height:56px}
   .posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;
     letter-spacing:.03em;color:var(--on-var)}
   /* the NFL abbreviation is the least useful thing here on a phone; the fantasy
