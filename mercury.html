@@ -115,8 +115,9 @@ td.r,th.r{text-align:right}
 .bar{display:inline-block;width:52px;height:2px;background:rgba(237,237,243,.14);margin-left:10px;
   vertical-align:middle;position:relative}
 .bar i{position:absolute;inset:0 auto 0 0;background:var(--ivory)}
-.edge{font-variant-numeric:tabular-nums;color:var(--ash)}
-.edge.pos{color:var(--ivory)}
+.edge{font-variant-numeric:tabular-nums;color:var(--ash);font-size:14px}
+.edge.up{display:inline-grid;place-items:center;min-width:52px;height:24px;border-radius:40px;
+  background:var(--obsidian);color:var(--ivory);font-size:12px;letter-spacing:.12px}
 .legend{margin-top:20px;font-size:12px;letter-spacing:.12px;color:var(--ash)}
 
 /* ---- lists ---- */
@@ -373,7 +374,7 @@ function render() {
     <td><span class="pos">${p.p}${p.posrk ?? ''}</span></td>
     <td class="r val">${Math.round(p.v)}<span class="bar"><i style="width:${Math.min(100, 100 * p.v / maxV)}%"></i></span></td>
     <td class="r rk">${p.adp ? p.adp.toFixed(1) : '—'}</td>
-    <td class="r"><span class="edge ${p.edge > 0 ? 'pos' : ''}">${p.edge == null ? '—' : (p.edge > 0 ? '+' : '') + p.edge}</span></td>
+    <td class="r"><span class="edge ${p.edge > 0 ? 'up' : ''}">${p.edge == null ? '—' : (p.edge > 0 ? '+' : '') + p.edge}</span></td>
     <td class="r rk">${p.fp ?? '—'}</td>
     <td class="r rk">${p.bye || '—'}</td>
   </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ash)">No players match.</td></tr>`;
@@ -406,7 +407,8 @@ render();
 (function curve() {
   const C = DATA.curves || {}, POS = ['WR', 'RB', 'TE', 'QB'];
   // no hues here: each line is ivory at a different opacity, per the single-accent rule
-  const OP = { WR: 1, RB: .68, TE: .44, QB: .26 };
+  const OP = { WR: 1, RB: .62, TE: .8, QB: .62 };
+  const DASH = { WR: '', RB: '', TE: '5 4', QB: '1.5 3.5' };
   const W = 560, H = 260, PAD = { l: 46, r: 16, t: 18, b: 34 };
   const N = 40, mx = Math.max(...POS.flatMap(p => (C[p] || []).slice(0, N)));
   const x = i => PAD.l + (i / (N - 1)) * (W - PAD.l - PAD.r);
@@ -414,7 +416,8 @@ render();
   const lines = POS.map(p => {
     const arr = (C[p] || []).slice(0, N); if (!arr.length) return '';
     return `<path d="${arr.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join('')}"
-      fill="none" stroke="#ededf3" stroke-opacity="${OP[p]}" stroke-width="1.6" stroke-linecap="round"/>`;
+      fill="none" stroke="#ededf3" stroke-opacity="${OP[p]}" stroke-width="${p === 'WR' ? 2 : 1.5}"
+      stroke-linecap="round" ${DASH[p] ? `stroke-dasharray="${DASH[p]}"` : ''}/>`;
   }).join('');
   const ticks = [1, 8, 16, 24, 32, 40].map(n =>
     `<text x="${x(n - 1)}" y="${H - 12}" fill="#c3c3cc" font-size="10" text-anchor="middle" font-family="Inter">${n}</text>`).join('');
@@ -422,7 +425,7 @@ render();
     `<line x1="${PAD.l}" y1="${y(v)}" x2="${W - PAD.r}" y2="${y(v)}" stroke="#70707d" stroke-opacity=".26"/>
      <text x="${PAD.l - 10}" y="${y(v) + 3.5}" fill="#c3c3cc" font-size="10" text-anchor="end" font-family="Inter">${v}</text>`).join('');
   el('clegend').innerHTML = POS.map(p =>
-    `<span><i style="opacity:${OP[p]}"></i>${p} · repl ${R[p] ?? ''}</span>`).join('');
+    `<span><i style="opacity:${OP[p]};${DASH[p] ? 'background:repeating-linear-gradient(90deg,#ededf3 0 3px,transparent 3px 6px)' : ''}"></i>${p} · repl ${R[p] ?? ''}</span>`).join('');
   el('curve').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:100%;height:auto"
     role="img" aria-label="Points above replacement by rank within each position">${yt}${ticks}${lines}</svg>`;
 })();
@@ -432,7 +435,7 @@ const li = (p, right) => `<li><span class="pos">${p.p}${p.posrk ?? ''}</span>
   <span class="nm">${esc(p.n)} <span class="sm">${esc(p.nfl || '')}</span></span>${right}</li>`;
 const sorted = withAdp.slice().sort((a, b) => b.edge - a.edge);
 el('buyList').innerHTML = sorted.slice(0, 7)
-  .map(p => li(p, `<span class="sm num">ADP ${p.adp.toFixed(0)}</span><span class="edge pos">+${p.edge}</span>`)).join('');
+  .map(p => li(p, `<span class="sm num">ADP ${p.adp.toFixed(0)}</span><span class="edge up">+${p.edge}</span>`)).join('');
 el('fadeList').innerHTML = sorted.slice(-7).reverse()
   .map(p => li(p, `<span class="sm num">ADP ${p.adp.toFixed(0)}</span><span class="edge">${p.edge}</span>`)).join('');
 // consensus vs projection disagreements, as a proxy for "who this model likes"
