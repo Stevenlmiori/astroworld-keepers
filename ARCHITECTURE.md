@@ -172,13 +172,21 @@ ever does:
 * No third WR with an empty backfield; no third RB before owning a receiver
 * Everyone leaves with a **backup running back**
 * Bench ceilings: QB and TE capped at starters + 1; exactly one K and one DEF
-* K and DEF stay on the board until only enough picks remain to cover them
+* K and DEF carry **zero model value**, so the lineup maths will never choose one.
+  Left to the forced-fill rule alone they all land in the last two rounds, which is
+  not how a room behaves. Instead a window opens once a team's skill lineup is whole
+  and it has taken a bench flier: defenses from round `ROUNDS−5`, kickers from
+  `ROUNDS−4`, with the odds climbing toward the end. Defenses go a round or so before
+  kickers, as they do in life. The forced fill remains as the backstop.
 * A second TE never counts toward FLEX (this is what made teams take two tight ends
   in the first four rounds)
 * Depth weights: a first backup RB is worth ~0.5 of a starter, a fourth WR ~0.34
 
 All of these adapt to the configured roster in Custom mode — set DEF to 0 and no
 defense is ever drafted.
+
+`armTwoStep(id, label, count, run, armLabel)` — pass `armLabel` for any button whose
+count is not a meaningful noun, or the armed state reads "1? Tap again".
 
 **When changing the sim, re-run the audit.** Drive it directly rather than through the
 buttons (`while (currentPick()) simOne()`), because the two-step confirm buttons do
