@@ -77,6 +77,31 @@ Astroworld starts **QB / WR / WR / WR / RB / RB / TE / W-R-T flex / K / DEF**, 1
 teams, 15 rounds, full PPR, and **6-point passing touchdowns**. Those specifics are
 the entire reason this tool exists — generic PPR rankings price none of them.
 
+### The three value numbers, and which column shows what
+
+`refresh.py` emits three per-player numbers. Two of them are now visible in the UI,
+because showing only the blend made the model look wrong to a human reader:
+
+| Field | Column | What it is |
+|---|---|---|
+| `slotv` | *(not shown)* | Value of whoever sits at this player's FantasyPros consensus rank inside his position pool — i.e. what the expert market thinks he's worth |
+| `ownv` | **Proj** | Points above replacement from our own ESPN+Sleeper blended projections, no consensus mixed in |
+| `v` | **Value** | `0.5 * slotv + 0.5 * ownv` — the number the board sorts, drafts and simulates on |
+
+The **Proj** column replaced an older "Gap" column (`fp - ar`), which duplicated
+information already carried by FP rank and Astro #. Proj is a real sort key
+(`proj: p.ownv`, set in the `DATA.players.map` on line 1 of both scripts) and is
+tinted green/red when it diverges from `v` by 3+ points.
+
+**Watch out:** `pts` is **ESPN-only** — it is the raw Astroworld-scored season total from
+the ESPN feed, kept for display. `ownv` is the *two-source* blend. They can rank players
+differently (Matthew Stafford is QB6 by `pts`, QB8 by `ownv`). The Proj cell tooltip
+therefore says "ESPN projects N pts" rather than implying `pts` is what the column is
+computed from.
+
+`gapCell()` still exists on the Value Board — the risers/fallers lists under the table
+use it. It is dead code on the Draft Room.
+
 ### Value = points above replacement
 
 ```
