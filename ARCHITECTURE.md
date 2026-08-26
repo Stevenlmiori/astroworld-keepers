@@ -135,6 +135,53 @@ QB15 — Sleeper's QB board is rushing-heavy and Stafford projects 19 rushing ya
 FantasyPros' humans also have him ~QB15 (FP #104). **If you quote "the projection" to the
 user, quote `bpts`.** Quoting `pts` overstates a single vendor's opinion as consensus.
 
+### Translating the consensus into this rulebook
+
+`slotv` prices a player by where the FantasyPros consensus ranks him *at his position*.
+But FantasyPros ranks for **4-point passing TDs** and Astroworld pays **6**. That gap is
+worth ~92 points a season to a 46-TD pocket passer and ~50 to a rushing quarterback, so
+the published ordering is systematically wrong for this league.
+
+`translate_consensus()` fixes it without inventing an opinion. For each projection source
+it ranks the position pool twice — once under generic scoring (`spts`, via
+`astro_points_std` / `sleeper_points_std`, which just subtract `2 * pass_td`) and once
+under Astroworld's — and averages how many places each player moves. That shift is applied
+to his consensus rank *before* `value_of()` prices it.
+
+It is a **translation of the experts' opinion into this rulebook, not a second opinion.**
+Non-QBs barely move: the league is full PPR, which is what the rankings already assume.
+QBs move up to ±4 places (2026: Dart −4, Daniels −3.5, Dak +3.5, Stafford +2.5).
+The shift is exposed on the page as `cmove` for auditing.
+
+Validated against 2025: Stafford finished **QB1** in Astroworld scoring (442.4 pts, 46
+passing TDs, 1 rushing yard) but only QB3 under standard scoring — from a preseason rank
+of 17. The correction moves exactly the players it should.
+
+### Value weighting is a user control
+
+`CONSENSUS_WEIGHT = 0.5` in `refresh.py` is only the **shipped default**. The pages carry a
+three-way control (`.wchip`, `localStorage['astroworld-weight']`):
+
+| Mode | Consensus weight |
+|---|---|
+| Balanced (default) | 0.5 |
+| Projection-led | 0.25 |
+| Projections only | 0 |
+
+`applyWeights()` recomputes `v`, then re-derives **Astro # (`ar`)**, **Edge** and `gap` for
+the whole board — Edge by walking ADP order backwards carrying a running max, exactly as
+`refresh.py` does.
+
+Two things to know:
+
+* **Balanced restores `v0`/`ar0`/`edge0`**, snapshots of what `refresh.py` shipped, rather
+  than recomputing. The payload rounds `slotv`/`ownv` to one decimal, so recomputing would
+  drift a tenth from the build. The default view must match the build exactly.
+* **It deliberately does NOT change how simulated opponents draft.** `cpuVal()` reads
+  `slotv`, because the room drafts off FantasyPros regardless of what you believe.
+
+`maxV` is therefore `let`, not `const`, and is recomputed in `redrawAfterWeights()`.
+
 ### The Pts column has two modes
 
 Raw season points cannot be compared across positions — sorting on them stacks every QB
