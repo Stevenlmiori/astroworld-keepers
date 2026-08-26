@@ -77,30 +77,52 @@ Astroworld starts **QB / WR / WR / WR / RB / RB / TE / W-R-T flex / K / DEF**, 1
 teams, 15 rounds, full PPR, and **6-point passing touchdowns**. Those specifics are
 the entire reason this tool exists — generic PPR rankings price none of them.
 
-### The three value numbers, and which column shows what
+### The four numbers, and which column shows what
 
-`refresh.py` emits three per-player numbers. Two of them are now visible in the UI,
-because showing only the blend made the model look wrong to a human reader:
+`refresh.py` emits four per-player numbers. Three are visible, because showing only the
+blend made the model look wrong to a human reader.
 
 | Field | Column | What it is |
 |---|---|---|
-| `slotv` | *(not shown)* | Value of whoever sits at this player's FantasyPros consensus rank inside his position pool — i.e. what the expert market thinks he's worth |
-| `ownv` | **Proj** | Points above replacement from our own ESPN+Sleeper blended projections, no consensus mixed in |
-| `v` | **Value** | `0.5 * slotv + 0.5 * ownv` — the number the board sorts, drafts and simulates on |
+| `slotv` | *(hidden)* | Value of whoever sits at this player's FantasyPros consensus rank inside his position pool — what the expert market thinks he's worth |
+| `ownv` | *(hidden, drives the Pts tint)* | Points above replacement from the ESPN+Sleeper blend, no consensus |
+| `v` | **Value** | `0.5*slotv + 0.5*ownv`. Cross-position comparable. **Everything drafts, sorts and simulates on this.** |
+| `bpts` | **Pts** | Best estimate of actual Astroworld fantasy points for the season. Only comparable *within* a position. |
+| `pts` | *(hidden)* | **ESPN-only** season total. Kept for reference. Do not show it as "the projection" — see below. |
 
-The **Proj** column replaced an older "Gap" column (`fp - ar`), which duplicated
-information already carried by FP rank and Astro #. Proj is a real sort key
-(`proj: p.ownv`, set in the `DATA.players.map` on line 1 of both scripts) and is
-tinted green/red when it diverges from `v` by 3+ points.
+### How `bpts` is built
 
-**Watch out:** `pts` is **ESPN-only** — it is the raw Astroworld-scored season total from
-the ESPN feed, kept for display. `ownv` is the *two-source* blend. They can rank players
-differently (Matthew Stafford is QB6 by `pts`, QB8 by `ownv`). The Proj cell tooltip
-therefore says "ESPN projects N pts" rather than implying `pts` is what the column is
-computed from.
+`blend_projections()` computes two things from the same two sources:
 
-`gapCell()` still exists on the Value Board — the risers/fallers lists under the table
-use it. It is dead code on the Draft Room.
+* `pts` (the VORP one) — each source's points **above replacement**, floored at 0, averaged.
+  Floored because a value model should not reward being deeply below replacement.
+* `bpts` — the same scale-cancelling deviation-from-baseline trick **without the floor**
+  (flooring would collapse every sub-replacement player onto one identical number, which
+  is useless in a points column), re-expressed as season points by adding ESPN's
+  replacement baseline back on. So it reads as a 17-game season total.
+
+Both use each source's *own* replacement level, which is the whole point: Sleeper projects
+18 games and ESPN 17, so raw totals are not comparable but deviations from a startable
+baseline are.
+
+**The ESPN-only trap.** `pts` and `bpts` can rank players very differently. Matthew
+Stafford is QB6 on ESPN alone (369) but QB8 blended (355), because Sleeper has him at
+QB15 — Sleeper's QB board is rushing-heavy and Stafford projects 19 rushing yards.
+FantasyPros' humans also have him ~QB15 (FP #104). **If you quote "the projection" to the
+user, quote `bpts`.** Quoting `pts` overstates a single vendor's opinion as consensus.
+
+### Column order (both tables)
+
+`✓ | Astro # | Player | Pos | Value | Pts | ADP | FP rank | Edge | Bye`
+
+Grouped: identity, then **our model** (Value, Pts), then **the market** (ADP, FP rank),
+then Edge as the model-vs-market verdict, then Bye. `Pts` is a real sort key set on line 1
+of both scripts (`pts: p.bpts != null ? p.bpts : p.pts`), which **shadows** the raw ESPN
+`p.pts` inside the page — intentional, so no UI code can accidentally show the ESPN-only
+number. The Pts cell is tinted green/red where `ownv` and `v` disagree by 3+.
+
+This replaced an older "Gap" column (`fp - ar`) that duplicated FP rank and Astro #.
+`gapCell()` survives on the Value Board only, for the risers/fallers lists.
 
 ### Value = points above replacement
 
