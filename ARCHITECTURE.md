@@ -110,7 +110,8 @@ blend made the model look wrong to a human reader.
 | `slotv` | *(hidden)* | Value of whoever sits at this player's FantasyPros consensus rank inside his position pool — what the expert market thinks he's worth |
 | `ownv` | *(hidden, drives the Pts tint)* | Points above replacement from the ESPN+Sleeper blend, no consensus |
 | `v` | **Value** | `0.5*slotv + 0.5*ownv`. Cross-position comparable. **Everything drafts, sorts and simulates on this.** |
-| `bpts` | **Pts** | Best estimate of actual Astroworld fantasy points for the season. Only comparable *within* a position. |
+| `bpts` | **Pts** (season-total mode) | Best estimate of actual Astroworld fantasy points for the season. Only comparable *within* a position. |
+| `ownv` | **Pts+** (over-replacement mode) | The same blended projection minus the positional replacement baseline — the cross-position version of Pts. |
 | `pts` | *(hidden)* | **ESPN-only** season total. Kept for reference. Do not show it as "the projection" — see below. |
 
 ### How `bpts` is built
@@ -133,6 +134,26 @@ Stafford is QB6 on ESPN alone (369) but QB8 blended (355), because Sleeper has h
 QB15 — Sleeper's QB board is rushing-heavy and Stafford projects 19 rushing yards.
 FantasyPros' humans also have him ~QB15 (FP #104). **If you quote "the projection" to the
 user, quote `bpts`.** Quoting `pts` overstates a single vendor's opinion as consensus.
+
+### The Pts column has two modes
+
+Raw season points cannot be compared across positions — sorting on them stacks every QB
+at the top, which is useless on a draft board. So the column toggles:
+
+* **season total** (`ptsTot` = `bpts`) — reads naturally, compare within a position
+* **over replacement** (`ptsPar` = `ownv`) — header becomes `Pts+`, comparable across positions
+
+The `#ptsMode` button in the filter bar flips it; the choice persists in
+`localStorage['astroworld-ptsmode']`. `applyPtsMode()` rewrites `p.pts` on every player
+(so the existing `data-k="pts"` sort key keeps working untouched), retitles the `th`, and
+relabels the button. **It must run before the first `render()`** — it is called just ahead
+of `renderAll()` / `render()` at the bottom of each script.
+
+Note `ownv` is `null` for K/DST (and one junk TE), so those show `—` in Pts+ mode.
+
+Pts+ is deliberately *not* the same as **Value**: Value blends `ownv` 50/50 with the expert
+consensus slot value, Pts+ is projection-only. Sorting the two side by side is the fastest
+way to see where the model and the market disagree.
 
 ### Column order (both tables)
 
