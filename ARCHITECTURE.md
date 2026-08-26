@@ -77,6 +77,29 @@ Astroworld starts **QB / WR / WR / WR / RB / RB / TE / W-R-T flex / K / DEF**, 1
 teams, 15 rounds, full PPR, and **6-point passing touchdowns**. Those specifics are
 the entire reason this tool exists — generic PPR rankings price none of them.
 
+### ⚠ Two things that silently break the pages
+
+**1. `refresh.py` owns the document preamble.** `assemble.py` produces a *fragment* —
+`head.html` starts at `<title>`, with no `<!doctype>`, `<html>`, `<head>`,
+`<meta charset>` or `<meta name="viewport">`. `refresh.py` prepends all of those when it
+writes the final page (and inserts `</head><body>` before `<header class="bar">`).
+
+So **never hand-roll "inject the data blob into the template"** as a shortcut to avoid
+re-fetching. It produces a page with no doctype and no viewport meta, which renders at
+980px on every phone and silently disables every `max-width:700px` rule. Always go
+through `refresh.py` (or `./update.sh`).
+
+**2. The narrow-screen column hides are positional.** `head.html` hides columns with
+`.t-value thead th:nth-child(N)` / `tbody td:nth-child(N)` inside `@media (max-width:700px)`.
+Both tables (Value Board *and* Draft Room) carry `class="t-value"`, so one rule governs
+both. **Reordering or adding a column silently hides the wrong one** — the header and the
+cell keep matching, so nothing looks broken, you just lose a different column than you meant
+to. Re-check those indices after any column change.
+
+Related: `thead th` is `text-align:left` by default and `td.r` is right-aligned, so a
+right-aligned numeric column needs `class="r"` on **both** the `th` and the `td`, or the
+header floats left of its own numbers.
+
 ### The four numbers, and which column shows what
 
 `refresh.py` emits four per-player numbers. Three are visible, because showing only the
