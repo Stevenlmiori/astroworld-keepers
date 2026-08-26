@@ -96,9 +96,19 @@ both. **Reordering or adding a column silently hides the wrong one** — the hea
 cell keep matching, so nothing looks broken, you just lose a different column than you meant
 to. Re-check those indices after any column change.
 
-Related: `thead th` is `text-align:left` by default and `td.r` is right-aligned, so a
-right-aligned numeric column needs `class="r"` on **both** the `th` and the `td`, or the
-header floats left of its own numbers.
+Related, and it bit twice: a right-aligned numeric column needs `class="r"` on **both**
+the `th` and the `td` (`thead th` is `text-align:left` by default), **and** the sort arrow
+must be taken out of flow. `.ar` is `opacity:0` when inactive but still occupied ~9px of
+layout width, which pushed every right-aligned header label 9px left of its own numbers —
+visible as a persistent, subtle misalignment. Fixed with `thead th.r{position:relative}` +
+`thead th.r .ar{position:absolute;right:4px}`, parking the arrow in the cell's 14px right
+padding, plus deleting the literal space between label and `<span class="ar">` in every
+`.r` header (`white-space:nowrap` preserves it otherwise). `applyPtsMode()` writes the Pts
+label with no trailing space for the same reason.
+
+To check this rather than eyeball it: compare `Range.getClientRects()` on the header's
+first text node against the cell's contents — every right-aligned column should report an
+offset of exactly 0.
 
 ### The four numbers, and which column shows what
 
