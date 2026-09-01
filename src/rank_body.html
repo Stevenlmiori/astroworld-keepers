@@ -1,0 +1,146 @@
+<header class="bar">
+  <div class="wrap">
+    <div class="mark">AW</div>
+    <div>
+      <div class="barttl">Value Board</div>
+      <div class="sub">Astroworld &middot; 2026 Season</div>
+    </div>
+    <div class="spacer"></div>
+    <nav class="pagenav" aria-label="Pages">
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/">Keepers</a>
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/rankings.html" class="active" aria-current="page">Value Board</a>
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/draft.html">Draft Room</a>
+    </nav>
+    <button class="iconbtn" id="themeBtn" aria-label="Switch color theme" title="Switch theme">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8v8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.5 4.9 4.9 3.5l2.1 2.1L5.6 7 3.5 4.9Zm13.4 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1ZM19.1 3.5l1.4 1.4L18.4 7 17 5.6l2.1-2.1ZM5.6 17l1.4 1.4-2.1 2.1-1.4-1.4L5.6 17ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>The Value Board</h1>
+  </div>
+
+  <section id="roster-sec">
+    <div class="rosterhead">
+      <h3>My roster</h3>
+      <span class="rosternote" id="rosterNote"></span>
+    </div>
+    <div class="roster" id="roster"></div>
+  </section>
+
+  <section id="all">
+    <div class="filters">
+      <span class="sel"><select id="posSel" aria-label="Filter by position"><option value="">All positions</option></select></span>
+      <button class="fchip" data-view="" aria-pressed="true">All</button>
+      <button class="fchip" data-view="avail" aria-pressed="false">Available</button>
+      <button class="fchip" data-view="mine" aria-pressed="false">My team</button>
+      <button class="fchip" id="ptsMode" title="Switch the Pts column between his projected season total (compare within a position) and his points above replacement (compare across positions).">Pts: season total</button>
+      <input type="search" id="q" placeholder="Search players…" aria-label="Search players">
+      <span class="spacer"></span>
+      <span class="draftcount" id="draftCount"></span>
+      <button class="fchip danger" id="clearBtn">Clear drafted</button>
+    </div>
+      <div class="wrow">
+        <span class="wlbl">Value weighting</span>
+        <div class="wchips">
+          <button class="wchip" data-w="balanced" aria-pressed="true">Balanced</button>
+          <button class="wchip" data-w="proj" aria-pressed="false">Projection-led</button>
+          <button class="wchip" data-w="pure" aria-pressed="false">Projections only</button>
+        </div>
+        <span class="wnote" id="wNote"></span>
+      </div>
+    <div class="tablewrap" id="tblwrap">
+      <table id="tbl" class="t-value">
+        <thead><tr>
+          <th class="chkcol" title="Tick a player once he is drafted"><span aria-hidden="true">✓</span></th>
+          <th data-k="ar" data-dir="asc" class="r" title="Overall rank by Value in this league&#39;s lineup and scoring.">Astro #<span class="ar">▲</span></th>
+          <th data-k="n">Player <span class="ar">▼</span></th>
+          <th data-k="p">Pos <span class="ar">▼</span></th>
+          <th data-k="v" class="r" title="What he is worth as a DRAFT PICK: points above replacement, half from the projections (see Pts) and half from where the expert consensus ranks him. Cross-position comparable — a WR at 80 and a QB at 80 are equally good picks. This is what the board drafts and simulates on.">Value<span class="ar">▼</span></th>
+          <th data-k="pts" class="r" title="Our best estimate of his ACTUAL Astroworld fantasy points for the season — ESPN and Sleeper projections blended, on a 17-game scale, scored with this league&#39;s exact rules (full PPR, 6-point passing TDs, -2 INT). No expert opinion in it. Only compare within a position: every QB outscores every RB.">Pts<span class="ar">▼</span></th>
+          <th data-k="adp" class="r" title="Real redraft PPR average draft position, from Sleeper. Where the room will actually take him.">ADP<span class="ar">▼</span></th>
+          <th data-k="fp" class="r" title="FantasyPros expert consensus overall rank — where the room is ranking him.">FP rank<span class="ar">▼</span></th>
+          <th data-k="edge" class="r" title="Value minus the best player still on the board after his ADP. Positive means taking him at his market price beats waiting — the room is underpaying for him in this format.">Edge<span class="ar">▼</span></th>
+          <th data-k="bye" class="r">Bye<span class="ar">▼</span></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section id="method">
+    <div class="sechead">
+      <h3>What "value" means here</h3>
+      <p>The same engine that drives the keeper ratings, exposed on its own so you can draft off it.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h4>Points above replacement</h4>
+        <p>Astroworld starts <b>QB / WR / WR / WR / RB / RB / TE / flex</b> across 12 teams. That lineup decides
+          how deep each position runs before you are into waiver-wire bodies — and that depth is what a player's
+          value is measured against.</p>
+        <div id="curve"></div>
+      </div>
+      <div class="panel">
+        <h4>Why it disagrees with the consensus</h4>
+        <p>FantasyPros ranks for a generic PPR league. Two things about this one push players around:</p>
+        <ul class="rules">
+          <li><span class="n">1</span><div><b>Three WR slots.</b> Receivers stay startable down to about WR43, so a mid-tier WR is easy to replace and worth less than his overall rank suggests.</div></li>
+          <li><span class="n">2</span><div><b>One TE slot with a cliff.</b> After the top handful, tight end falls off a ledge — which makes the good ones quietly scarce.</div></li>
+          <li><span class="n">3</span><div><b>One QB slot.</b> Even with 6-point passing TDs, QB13 scores nearly what QB6 does. Past the elite few a quarterback is streamable.</div></li>
+        </ul>
+        <h4 style="margin-top:20px">Column key</h4>
+        <ul class="ckey">
+          <li><span class="ck">Astro #</span><div>This model's overall board — every player re-ranked by <b>Value</b> for this league. Rank 1 is the best pick available.</div></li>
+          <li><span class="ck">Value</span><div>What he is worth <b>as a draft pick</b>: projected points above the last startable player at his position.
+            <span class="hint">Compare across positions — a WR at 80 and a QB at 80 are equally good picks. This is what the board sorts, drafts and simulates on. By default it is half projection, half expert consensus; the <b>Value weighting</b> buttons above the table change that mix, and Astro # and Edge move with it.</span></div></li>
+          <li><span class="ck">Pts</span><div>Best estimate of the <b>fantasy points he actually scores</b> this season in Astroworld scoring — full PPR, 6-point passing TDs, −2 per INT. ESPN and Sleeper projections blended, 17-game basis. No expert opinion in it.
+            <span class="hint">Only comparable <b>within</b> a position — every starting QB outscores every RB, so sorting on it stacks quarterbacks at the top.</span></div></li>
+          <li><span class="ck">Pts+</span><div>The same projection measured from the <b>last startable player at his position</b> instead of from zero — which makes it comparable <b>across</b> positions. Sorting on it gives you a real draft board with no expert opinion in it.
+            <span class="hint">Use the <b>Pts: season total / over replacement</b> button above the table to switch. Green means the projections rate him above the consensus, red below; hover a number for the other view.</span></div></li>
+          <li><span class="ck">ADP</span><div>Average draft position in real PPR redraft leagues, from Sleeper — roughly <b>where the room will take him</b>.</div></li>
+          <li><span class="ck">FP rank</span><div>FantasyPros overall consensus rank. A <b>market ordering, not a value scale</b> — and it is built for generic scoring, so it under-rates what this league pays for.</div></li>
+          <li><span class="ck">Edge</span><div>Value minus the best player still on the board after his ADP. <b>Positive means he is a bargain</b> at his market price; negative means waiting gets you more.
+            <span class="hint">The single most actionable column on draft day.</span></div></li>
+          <li><span class="ck">Bye</span><div>Bye week. Watch for three or more starters sharing one.</div></li>
+          <li><span class="ck">$ tag</span><div>A <b>Vegas adjustment</b>. Kalshi runs real-money markets on season stat thresholds ("4,000+ passing yards?"). Where a player's market is liquid and brackets the 50% line, that money-backed median is compared with the projections and the projection is moved halfway toward it, capped at ±20 points.
+            <span class="hint">Only ~25 players have markets liquid enough to count. The money runs a few percent <b>below</b> the projections almost everywhere — it prices missed games, projections don't. Hover the tag for the exact stat.</span></div></li>
+        </ul>
+        <div class="stamp"><span class="dot"></span><span>Rankings and projections last pulled <b><span id="stamp"></span></b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="movers">
+    <div class="sechead">
+      <h3>Biggest disagreements with the consensus</h3>
+      <p>Where this league's settings move a player furthest from where the market has him.</p>
+    </div>
+    <div class="lists">
+      <div class="panel">
+        <h4>Undervalued here</h4>
+        <p style="font-size:13px">This format likes them more than the consensus does.</p>
+        <ul class="ilist" id="upList"></ul>
+      </div>
+      <div class="panel">
+        <h4>Overvalued here</h4>
+        <p style="font-size:13px">The market ranks them above what this lineup actually rewards.</p>
+        <ul class="ilist" id="downList"></ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer><div class="wrap">
+  Value = projected points above replacement in Astroworld scoring, from ESPN and Sleeper 2026 projections
+  blended, plus the FantasyPros PPR expert consensus (<span id="upd"></span>, <span id="nexp"></span> experts).
+  <b>Data last pulled <span id="built"></span>.</b> A model, not a prophecy — read it as a shortlist, not a verdict.
+  <a href="https://stevenlmiori.github.io/astroworld-keepers/">Back to the keeper board →</a>
+</div></footer>

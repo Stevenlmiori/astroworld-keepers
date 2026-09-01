@@ -52,18 +52,25 @@ refresh.py ──fetches──▶ FantasyPros ECR + ESPN projections + Sleeper p
 | `site/` | **YES** | Git checkout of the published site. Written by `deploy.sh`. |
 | `last_ranks.json`, `last_run.txt` | yes | Previous run's numbers, for the "what moved" report |
 
-### ⚠️ The templates are generated
+### ⚠️ The templates are generated — edit `src/`, then run `python3 src/assemble.py`
 
-The three `*_template.html` files are assembled from source fragments that live in a
-scratch directory outside this folder. **Editing a template directly will be silently
-overwritten** the next time the page is assembled.
+The three `*_template.html` files are built from the fragments in **`src/`**:
 
-If you need to change page markup, styling or client-side JS and the source fragments
-are not available, the practical move is to **recover them from a template**: each
-template is `head + body + <script>const DATA=__KEEPER_DATA__; …</script>`, so it can
-be split back into its three parts, edited, and reassembled. Treat that split as the
-first step of any front-end change, and consider committing the fragments into this
-folder so the next person does not have to.
+| Fragment | Used by |
+|---|---|
+| `src/head.html` | all three pages (shared `<title>`, fonts, every CSS rule) |
+| `src/body.html` + `src/script.js` | Keepers |
+| `src/rank_body.html` + `src/rank_script.js` | Value Board |
+| `src/draft_body.html` + `src/draft_script.js` | Draft Room |
+
+`src/assemble.py` writes the templates; `refresh.py` then injects data and the document
+preamble. **Never hand-edit a template** — it is overwritten on the next assemble.
+
+History, so nobody repeats it: the fragments originally lived in a session scratchpad
+outside the project and were **wiped by the OS on 2026-09-01**. They were recovered by
+splitting the templates back into `head + body + <script>` at the `<header class="bar">`
+and `const DATA=__KEEPER_DATA__` boundaries — a round-trip that differed only by blank
+lines. They now live in `src/` and are committed to the site repo.
 
 ---
 
@@ -144,6 +151,47 @@ Stafford is QB6 on ESPN alone (369) but QB8 blended (355), because Sleeper has h
 QB15 — Sleeper's QB board is rushing-heavy and Stafford projects 19 rushing yards.
 FantasyPros' humans also have him ~QB15 (FP #104). **If you quote "the projection" to the
 user, quote `bpts`.** Quoting `pts` overstates a single vendor's opinion as consensus.
+
+### Scoring audit (2026-09-01)
+
+`astro_points()` was checked line-by-line against the league's Yahoo *Scoring & Settings*
+page (saved in `../2026 Keeper Rating/`). Every line matched — completions .02, 25 yds/pt
+passing, 6-pt passing TD, −2 INT, 10 yds/pt rushing and receiving, 6-pt TDs, 1/rec, −2
+fumbles — **except 2-point conversions (+2)**, which were missing from both scoring
+functions. Added: ESPN stat ids 19/26/44 (pass/rush/rec), Sleeper `pass_2pt`/`rush_2pt`/
+`rec_2pt`. Worth at most a few points a season to a handful of players.
+
+### The market source (Kalshi)
+
+`fetch_kalshi()` pulls Kalshi's season stat-threshold markets ("Will X record 4,000+
+passing yards?") — the seven series in `KALSHI_SERIES`. These are the right Vegas input
+because they are **scoring-agnostic**. Two things that look like better market signals
+are traps:
+
+* **`KXNFLFFLEADER` ("#1 fantasy QB") settles on Sleeper PPR = 4-point passing TDs.**
+  It carries exactly the distortion this league does not want (Stafford at 1.5% there is
+  the consensus's opinion, re-expressed with money). Do not use it raw.
+* **Thin ladders lie.** A single high-threshold rung at a few cents is dominated by
+  longshot bias; fitting a mean to it produced absurd numbers (a rookie WR at 104
+  catches). A first attempt that blended those in would have made the model *worse*.
+
+So the filters are strict and deliberate: a rung counts only if its bid/ask spread is
+≤ `MKT_MAX_SPREAD` (0.15), and a player's stat counts only if the ladder **brackets the
+50% line** — the crossing is then a money-backed median. That leaves ~25–30 players.
+`market_adjust()` moves each covered stat `MKT_PULL` (50%) of the way toward that
+median, converts to points, caps the total at ±`MKT_CAP` (20), and applies it to **both**
+sources' `pts`/`spts` before blending — so it flows through `ownv`, `bpts`, `Value` and
+the consensus translation alike. The delta and its stat detail ship as `mkt` and render
+as the green/red **`$` tag** beside the name.
+
+What the money says, consistently: liquid medians sit a few percent **below** the
+projections almost everywhere (pass yds −80, rush yds −110, rec yds −28 at the median).
+Markets price missed games; projections assume 17 healthy ones. That is the whole
+signal, and it is why the adjustment is a haircut on nearly every tagged player.
+
+Kalshi team win totals (`KXNFLWINS`) were also pulled for context (Rams 12.4, highest in
+the league) but are not wired into the model — there is no clean mapping from team wins
+to one player's points.
 
 ### Translating the consensus into this rulebook
 

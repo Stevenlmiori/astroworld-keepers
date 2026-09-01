@@ -1,0 +1,136 @@
+<header class="bar">
+  <div class="wrap">
+    <div class="mark">AW</div>
+    <div>
+      <div class="barttl">Astroworld Keepers</div>
+      <div class="sub">2026 Season &middot; 12 Teams &middot; 15 Rounds</div>
+    </div>
+    <div class="spacer"></div>
+    <nav class="pagenav" aria-label="Pages">
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/" class="active" aria-current="page">Keepers</a>
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/rankings.html">Value Board</a>
+      <a href="https://stevenlmiori.github.io/astroworld-keepers/draft.html">Draft Room</a>
+    </nav>
+    <button class="iconbtn" id="themeBtn" aria-label="Switch color theme" title="Switch theme">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8v8ZM11 1h2v3h-2V1Zm0 19h2v3h-2v-3ZM3.5 4.9 4.9 3.5l2.1 2.1L5.6 7 3.5 4.9Zm13.4 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1ZM19.1 3.5l1.4 1.4L18.4 7 17 5.6l2.1-2.1ZM5.6 17l1.4 1.4-2.1 2.1-1.4-1.4L5.6 17ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Astroworld Keepers</h1>
+    <p class="lede">Every player left on your final 2025 roster costs <b>one round earlier</b> than where he
+      went last year. Every player is rated <b>0–100</b> on how much he actually wins you: the fantasy points
+      gained by keeping him instead of drafting at that pick, measured against whoever would really still be
+      on the board.</p>
+  </div>
+
+  <section id="all">
+    <div class="filters">
+      <span class="sel"><select id="teamSel" aria-label="Filter by team"><option value="">All teams</option></select></span>
+      <button class="fchip" data-pos="" aria-pressed="true">All</button>
+      <button class="fchip" data-pos="QB" aria-pressed="false">QB</button>
+      <button class="fchip" data-pos="RB" aria-pressed="false">RB</button>
+      <button class="fchip" data-pos="WR" aria-pressed="false">WR</button>
+      <button class="fchip" data-pos="TE" aria-pressed="false">TE</button>
+      <button class="fchip" id="inelBtn" aria-pressed="false">Show locked out</button>
+      <input type="search" id="q" placeholder="Search players…" aria-label="Search players">
+    </div>
+    <div class="tablewrap" id="tblwrap">
+      <table id="tbl" class="t-keeper">
+        <thead><tr>
+          <th data-k="s" data-dir="desc">Rating <span class="ar">▼</span></th>
+          <th data-k="g">Grade <span class="ar">▼</span></th>
+          <th data-k="n">Player <span class="ar">▼</span></th>
+          <th data-k="p">Pos <span class="ar">▼</span></th>
+          <th data-k="t">Fantasy team <span class="ar">▼</span></th>
+          <th data-k="ar" class="r" title="This model's own overall board: every player re-ranked by what he is worth in Astroworld's exact lineup and scoring. Unlike the FantasyPros rank it accounts for positional scarcity — three WR slots make receivers deep, one QB slot makes quarterbacks nearly worthless past the elite few. When this number sits well above the FP rank, the consensus is undervaluing him for this format.">Astro rank<span class="ar">▼</span></th>
+          <th data-k="fp" class="r" title="FantasyPros overall consensus rank. It is a market ordering that blends every position together, NOT a value scale — do not read it against the pick slot. A player ranked 11th overall is not automatically worth the 10th pick, because a top-4 RB and a top-9 WR sit at very different scarcity. The Value column is the honest number.">FP rank<span class="ar">▼</span></th>
+          <th data-k="cp" class="r">'26 Pick Slot<span class="ar">▼</span></th>
+          <th data-k="gain" class="r">Pts gained<span class="ar">▼</span></th>
+          <th data-k="v" class="r" title="Projected fantasy points this player scores above the last startable player at HIS position. This is the number that actually matters — it already accounts for the fact that your lineup starts three WR but only two RB, so receivers run deeper and are easier to replace.">Value<span class="ar">▼</span></th>
+          <th data-k="r25" class="r">2025 rd<span class="ar">▼</span></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section id="method">
+    <div class="sechead">
+      <h3>How the score works</h3>
+      <p>A keeper is only worth what he beats. Ratings come from the projected fantasy points you gain by
+        keeping a player rather than spending that pick — valued in this league's exact scoring and lineup.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h4>Value above replacement, by position</h4>
+        <p>Every player is worth what he scores above the <em>last startable player at his position</em> — the
+          guy you could get off waivers for free. That baseline is set by the lineup: three WR slots make
+          receivers deep, one QB slot makes quarterbacks nearly worthless past the elite few.</p>
+        <div id="curve"></div>
+      </div>
+      <div class="panel">
+        <h4>What you'd get instead</h4>
+        <p>The old version compared a player's rank to his pick number. That badly overrates keepers at the top
+          of the draft, because pick 13 still lands an excellent player. So instead the model simulates the
+          board: it removes all twelve kept players, accounts for the picks those keepers consume, and reads off
+          who is actually still there.</p>
+        <p>This is why <b>FP rank and pick slot should never be read against each other</b>. Jonathan Taylor is
+          ranked 11th and costs pick 10, which looks like paying full price — but he is <b>RB4</b>, and the best
+          player left at pick 10 is a <b>WR9</b>. With three WR starting slots and two RB, receivers run far
+          deeper, so the ninth-best WR is much easier to replace than the fourth-best RB. Same neighbourhood on
+          the consensus board, forty-four points apart in what they actually win you.</p>
+        <div class="formula">points gained = value(your keeper) − value(best player left at that pick)</div>
+        <p style="margin-top:12px">Those points are then stretched onto a <b>0–100 rating</b>, so the number
+          is the grade: 90s are an A, 80s a B, 70s a C, 60s a D, and anything in the 50s or below is an F.
+          100 is reserved for a keeper nobody in this league has — an elite player at a near-free pick.</p>
+        <h4 style="margin-top:20px">League rules encoded here</h4>
+        <ul class="rules">
+          <li><span class="n">1</span><div>One keeper per team, from your <b>final 2025 roster</b>.</div></li>
+          <li><span class="n">2</span><div>Cost is <b>one round earlier</b> than his 2025 draft round.</div></li>
+          <li><span class="n">3</span><div>2025 first-rounders are <b>ineligible</b> — no round to pay.</div></li>
+          <li><span class="n">4</span><div>Anyone <b>kept in 2025 cannot be kept again</b>.</div></li>
+          <li><span class="n">5</span><div>Undrafted in 2025 slots in at <b>round 15</b>.</div></li>
+          <li><span class="n">6</span><div>Picks come from the real 2026 order: snake through round 2, then a <b>reverse snake</b>.</div></li>
+        </ul>
+        <h4 style="margin-top:20px">Where this is soft</h4>
+        <p>Late picks are valued at zero, which flatters deep keepers — real late picks are lottery tickets.
+          Projections can't price suspensions or injuries.</p>
+        <p style="margin-bottom:0">Four of the twelve teams are a genuine <b>tie</b>: re-running the whole
+          model under different assumptions about how deep startable players run at each position keeps
+          swapping which of their top two comes out ahead. Those teams are called out on the cards at the
+          bottom of the page. Treat the pair as level and decide on gut, or on who you trust to stay healthy.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="extras">
+    <div class="panel">
+      <h4>Locked out</h4>
+      <p style="font-size:13px">Disqualified before the math runs — 2025 first-rounders, and players already kept once.</p>
+      <ul class="ilist cols" id="inelList"></ul>
+    </div>
+  </section>
+
+  <section id="board">
+    <div class="sechead">
+      <h3>Best keeper, by team</h3>
+      <p>The single highest-value option on each roster, ordered by surplus. Each team's color is the one used
+        throughout the table above.</p>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+</div>
+</main>
+
+<footer><div class="wrap">
+  Rankings: FantasyPros overall PPR expert consensus (ECR), <span id="upd"></span>, <span id="nexp"></span> experts. Page built <span id="built"></span>.
+  Rosters, 2025 draft results, and the 2026 draft order come from the league's Yahoo pages.
+  Scores are a model, not a projection — read them as a shortlist, not a verdict.
+</div></footer>
