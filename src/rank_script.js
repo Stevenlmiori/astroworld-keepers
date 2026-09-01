@@ -256,7 +256,7 @@ function render() {
   });
   el('tbody').innerHTML = rows.map(rowHTML).join('') ||
     `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--on-var)">No players match those filters.</td></tr>`;
-  el('legend').innerHTML = `<span>${rows.length} shown · value = projected points above the last startable player at that position`;
+  el('legend').innerHTML = `<span>${rows.length} shown · value = projected points above the last startable player at that position</span>`;
 }
 document.querySelectorAll('#tbl thead th').forEach(th => th.addEventListener('click', () => {
   const k = th.dataset.k;
