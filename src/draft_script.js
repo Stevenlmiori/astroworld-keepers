@@ -309,6 +309,9 @@ function drawRoster() {
 const POSORD = { QB: 0, RB: 1, WR: 2, TE: 3, K: 4, DST: 5, DEF: 5 };
 [...new Set(P.map(p => p.p))].sort((a, b) => (POSORD[a] ?? 9) - (POSORD[b] ?? 9))
   .forEach(pos => el('posSel').insertAdjacentHTML('beforeend', `<option value="${esc(pos)}">${esc(pos)}</option>`));
+// The W/R/T slot: everyone who can fill it, in one list, so you can compare a WR3 to an RB2 directly.
+const FLEX_POS = new Set(['RB', 'WR', 'TE']);
+el('posSel').insertAdjacentHTML('beforeend', `<option value="FLEX">Flex (RB / WR / TE)</option>`);
 let maxV = Math.max(...P.map(p => p.v), 1);
 /* ---------- how much the expert consensus counts ----------
    Value ships as a 50/50 blend of the projections (ownv) and the consensus slot value
@@ -406,7 +409,7 @@ function render() {
   const taken = takenNames();
   const keeperNames = new Set(KAT.values());
   let rows = P.filter(p =>
-    (!posF || p.p === posF) &&
+    (!posF || (posF === 'FLEX' ? FLEX_POS.has(p.p) : p.p === posF)) &&
     (view === 'avail' ? !taken.has(p.n) : true) &&
     (!q || p.n.toLowerCase().includes(q) || (p.nfl || '').toLowerCase().includes(q)));
   const dir = sortDir === 'desc' ? -1 : 1;
