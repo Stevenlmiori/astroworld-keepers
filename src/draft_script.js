@@ -3,6 +3,7 @@ const P = DATA.players.map(p => ({ ...p, gap: (p.fp != null && p.ar != null) ? p
   // compares within a position; over-replacement is the cross-position version.
   ptsTot: (p.bpts != null ? p.bpts : p.pts),
   ptsPar: p.ownv,
+  off: (DATA.teamsOff && DATA.teamsOff[p.nfl]) ? DATA.teamsOff[p.nfl].off : null,
   // untouched copies of what refresh.py shipped, so 'Balanced' is exact
   v0: p.v, ar0: p.ar, edge0: p.edge,
   gap0: (p.fp != null && p.ar != null) ? p.fp - p.ar : null,
@@ -20,6 +21,14 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 // and IR get the loud treatment.
 const INJ = { Questionable: ['q', 'Q'], Doubtful: ['d', 'D'], Out: ['o', 'OUT'],
               IR: ['o', 'IR'], PUP: ['o', 'PUP'], Sus: ['o', 'SUS'] };
+const TEAM_OFF = DATA.teamsOff || {};
+const offCell = p => {
+  const t = TEAM_OFF[p.nfl];
+  if (!t) return '<span class="offchip none">—</span>';
+  // red (0) -> amber (50) -> green (100); oklch keeps the steps perceptually even
+  const hue = 25 + (t.off / 100) * 120;
+  return `<span class="offchip" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last">${esc(p.nfl)}</span>`;
+};
 const mktTag = p => p.mkt
   ? `<span class="mkt ${p.mkt[0] < 0 ? 'dn' : 'up'}" title="Vegas: ${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]} pts vs the projections — ${esc(p.mkt[1])}">$${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]}</span>`
   : '';
@@ -420,6 +429,7 @@ function render() {
       <td class="scorecell num r">${p.ar ?? '—'}</td>
       <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}${mktTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
       <td><span class="pos p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
+      <td class="r">${offCell(p)}</td>
       <td class="r num">${Math.round(p.v)}<span class="mini"><i style="width:${w}%"></i></span></td>
       <td class="r num">${ptsCell(p)}</td>
       <td class="r num">${p.adp ? p.adp.toFixed(1) : '—'}</td>
@@ -427,7 +437,7 @@ function render() {
       <td class="r num">${p.edge == null ? '—' : `<span class="gap ${p.edge >= 5 ? 'up' : p.edge <= -12 ? 'down' : ''}">${p.edge > 0 ? '+' + p.edge : p.edge}</span>`}</td>
       <td class="r num">${p.bye || '—'}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--on-var)">No players match those filters.</td></tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--on-var)">No players match those filters.</td></tr>`;
   const cur = currentPick();
   el('legend').innerHTML = `<span>${rows.length} shown · ${taken.size} off the board (${KAT.size} kept, ${PICKS.size} drafted)`
     + `${cur ? ` · tapping a row drafts to pick #${cur}` : ''}</span>`;

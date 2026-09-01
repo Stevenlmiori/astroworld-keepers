@@ -201,6 +201,15 @@ input[type="search"]{flex:1;min-width:160px;max-width:280px}
 .mkt.dn{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
 .mkt.up{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
 
+/* ---- team offense chip (market-derived, 0-100) ---- */
+.offchip{display:inline-block;min-width:34px;text-align:center;font-size:10.5px;font-weight:700;
+  letter-spacing:.04em;padding:3px 6px;border-radius:7px;font-family:"Roboto Mono",ui-monospace,monospace;
+  background:oklch(0.62 0.17 var(--h));color:#fff;cursor:help;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+:root[data-theme="dark"] .offchip,
+:root:not([data-theme="light"]) .offchip{background:oklch(0.52 0.16 var(--h))}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .offchip{background:oklch(0.62 0.17 var(--h))} }
+.offchip.none{background:var(--sc-high);color:var(--on-var);text-shadow:none}
+
 /* ---- table ---- */
 .tablewrap{overflow:auto;max-height:min(72vh,660px);overscroll-behavior:contain;border-radius:18px;background:var(--sc)}
 table{border-collapse:collapse;width:100%;min-width:820px}
@@ -447,14 +456,14 @@ footer a{color:var(--primary)}
   .t-keeper thead th:nth-child(2),.t-keeper tbody td:nth-child(2),
   .t-keeper thead th:nth-child(4),.t-keeper tbody td:nth-child(4){display:none}
   /* Value board + Draft Room (both use .t-value; checkbox is column 1).
-     Order is: 1 chk, 2 Astro#, 3 Player, 4 Pos, 5 Value, 6 Pts, 7 ADP,
-     8 FP rank, 9 Edge, 10 Bye.  Hide Pos (shown inline beside the name),
-     FP rank and Edge — Value, Pts and ADP are what you scan on a phone.
+     Order is: 1 chk, 2 Astro#, 3 Player, 4 Pos, 5 Off, 6 Value, 7 Pts,
+     8 ADP, 9 FP rank, 10 Edge, 11 Bye.  Hide Pos (shown inline beside the
+     name), FP rank and Edge — Value, Pts, Off and ADP are what you scan on a phone.
      ⚠ These are positional: re-check them whenever a column is added,
      removed or reordered in draft_body.html / rank_body.html. */
   .t-value thead th:nth-child(4),.t-value tbody td:nth-child(4),
-  .t-value thead th:nth-child(8),.t-value tbody td:nth-child(8),
-  .t-value thead th:nth-child(9),.t-value tbody td:nth-child(9){display:none}
+  .t-value thead th:nth-child(9),.t-value tbody td:nth-child(9),
+  .t-value thead th:nth-child(10),.t-value tbody td:nth-child(10){display:none}
   th.chkcol,td.chkcol{width:34px;padding-left:9px;padding-right:2px}
   .t-value .mini{display:none}
   /* 513 rows means one long name sets the column width for everybody; cap it so

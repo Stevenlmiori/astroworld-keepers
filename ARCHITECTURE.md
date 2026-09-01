@@ -193,6 +193,30 @@ Kalshi team win totals (`KXNFLWINS`) were also pulled for context (Rams 12.4, hi
 the league) but are not wired into the model — there is no clean mapping from team wins
 to one player's points.
 
+### Team offense chip (`Off` column)
+
+`fetch_kalshi_teams()` builds a 0-100 **team offensive environment** score for the colour
+chip beside every player. Kalshi has no full-ladder "team season points" market, so it is a
+composite of two things that do exist and are liquid:
+
+* **Implied regular-season win total** (`KXNFLWINS`, 32 teams, median of the ladder) —
+  the backbone, z-scored across the league.
+* A **tilt** from the "highest scoring team" / "lowest scoring team" books
+  (`KXNFLTEAMPTS-MOST27` / `-LEAST27`), each normalised to remove the overround:
+  `log((p_most + .005) / (p_least + .005)) / 3`. These are only informative at the tails,
+  which is exactly where an offense signal should bite.
+
+Result is min-max scaled 0-100 and shipped as `DATA.teamsOff[code] = {off, wins, pmost,
+pleast, rank}` (2026-09-01: LAR 100, DET 89, BUF 88 … CLE 13, ARI 4, MIA 0). Kalshi uses
+`JAX`; the board uses `JAC` — mapped in `KALSHI_TEAM`.
+
+On the page the chip's hue is `25 + off * 1.2` in oklch (red → amber → green, perceptually
+even). `off` is a real sort key on `P`. **The column sits at position 5**, so the
+narrow-screen `nth-child` hides moved to 4 / 9 / 10 — see the CSS comment.
+
+It is a **tiebreaker, not a projection**: a great back on a bad team still gets the
+carries. The column key says so.
+
 ### Translating the consensus into this rulebook
 
 `slotv` prices a player by where the FantasyPros consensus ranks him *at his position*.
