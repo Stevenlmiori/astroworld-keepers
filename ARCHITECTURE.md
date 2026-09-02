@@ -217,6 +217,52 @@ narrow-screen `nth-child` hides moved to 4 / 9 / 10 — see the CSS comment.
 It is a **tiebreaker, not a projection**: a great back on a bad team still gets the
 carries. The column key says so.
 
+### Simulation realism (2026-09-02)
+
+The user caught rooms drafting a fourth WR before a second RB — measured at **33 of 120**
+simulated team-drafts, with only **71%** of teams holding RB2 by round 6. Root cause was
+three compounding things in `cpuPick()` / `lineupValue()`:
+
+1. **The flex slot carried full starter weight**, so "WR4 into flex" scored the same as
+   "RB2 into a starting slot", and in a 3-WR PPR format the receiver usually had more
+   consensus value. Now `CPU_FLEX = {RB: .84, WR: .66}` — a per-position flex weight,
+   applied when the player lands there. Rooms prefer a back in that spot.
+2. **No urgency.** `urgency(round) = min(2, 1 + .18·(round−2))` now multiplies every
+   *starting* slot, so an empty RB2 in round 5 is a hole being fixed, not a value call.
+3. **RB VORP collapses at replacement (RB28)**, so a round-5 back like RB30 was worth ~5
+   to the model however the slots were weighted — humans take him anyway because that
+   is his ADP. `cpuVal()` is now **half consensus slot value, half "the value of a pick
+   at his ADP"** (`V_BY_RANK[round(adp)−1]`, computed from the *shipped* `v`, so the user's
+   weighting control never leaks into how opponents draft). This was the change that
+   actually moved RB3 timing.
+
+Plus a hard floor (no 4th WR while RB2 is empty; mirror for RBs), bench-RB depth weights
+raised (`CPU_DEPTH` RB .62/.34), and the shortlist ordered by **ADP** rather than expert
+rank — the board a room actually drafts off.
+
+Measured over 12 simulated drafts (144 team-drafts), before → after:
+
+| | before | after |
+|---|---|---|
+| RB2 by round 6 | 71% | **98%** |
+| RB2 by round 5 | 64% | 88% |
+| RB3 by round 8 | 29% | **63%** |
+| Ever 4 WR before RB2 | 33/120 | **0/144** |
+| WR2 by round 5 | 88% | 90% |
+| Illegal rosters | 0 | 0 |
+
+The measurement script lives in the session history, not the repo; the metrics above are
+the acceptance test for any future change to `cpuPick()`.
+
+### The Off chip is position-aware
+
+Tested on 2025 actuals in Astroworld scoring, team offense predicted fantasy finish
+strongly for QBs (Spearman +0.48; no top-12 QB from a bottom-10 offense), moderately for
+WRs (+0.28), barely for RBs (+0.17 — Achane RB5 on the #30 offense, Jeanty RB11 on #32)
+and not at all for TEs (−0.02). `OFF_TRUST = {QB: full, WR: soft, RB: off, TE: off}`
+drives a class on the chip: full colour, 62% opacity, or greyed with a coloured ring.
+The tooltip says why. The column key says so too.
+
 ### Translating the consensus into this rulebook
 
 `slotv` prices a player by where the FantasyPros consensus ranks him *at his position*.

@@ -22,12 +22,23 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const INJ = { Questionable: ['q', 'Q'], Doubtful: ['d', 'D'], Out: ['o', 'OUT'],
               IR: ['o', 'IR'], PUP: ['o', 'PUP'], Sus: ['o', 'SUS'] };
 const TEAM_OFF = DATA.teamsOff || {};
+// How much the team's offense actually predicts THIS position's fantasy finish. Tested on
+// 2025 actuals in Astroworld scoring: top-12 QBs came from top-half offenses 11 times in
+// 12 with zero from the bottom ten (rank correlation +0.48); WRs moderately (+0.28);
+// RBs barely (+0.17 — Achane was RB5 on the #30 offense, Jeanty RB11 on #32); TEs not
+// at all (−0.02). So the chip is full strength for a QB, muted for a WR, and greyed out
+// for a RB or TE so it cannot mislead at a glance.
+const OFF_TRUST = { QB: 'full', WR: 'soft', RB: 'off', TE: 'off' };
 const offCell = p => {
   const t = TEAM_OFF[p.nfl];
   if (!t) return '<span class="offchip none">—</span>';
+  const trust = OFF_TRUST[normPos(p.p)] || 'off';
   // red (0) -> amber (50) -> green (100); oklch keeps the steps perceptually even
   const hue = 25 + (t.off / 100) * 120;
-  return `<span class="offchip" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last">${esc(p.nfl)}</span>`;
+  const why = trust === 'full' ? 'Strong signal for a QB.'
+            : trust === 'soft' ? 'Moderate signal for a WR — target share matters more.'
+            : `Weak signal for a ${normPos(p.p)} — volume beats team quality. Shown for context only.`;
+  return `<span class="offchip ${trust}" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last. ${why}">${esc(p.nfl)}</span>`;
 };
 const mktTag = p => p.mkt
   ? `<span class="mkt ${p.mkt[0] < 0 ? 'dn' : 'up'}" title="Vegas: ${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]} pts vs the projections — ${esc(p.mkt[1])}">$${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]}</span>`
@@ -497,18 +508,49 @@ function openSlots(team) {
 // the lineup I have". Those are the same answer in round 1 and very different in
 // round 5 — which is why nobody takes a fourth receiver before their first back.
 // The CPU values players the way the room does, off FantasyPros' slot value.
-const cpuVal = p => (p.slotv != null ? p.slotv : p.v) || 0;
-const CPU_FLEX = { WR: 1, RB: 1 };   // rooms flex a receiver or a back, not a second TE
+// What a player is worth TO THE ROOM. Half the consensus value, half "what a pick at
+// his ADP is worth" — the value of the player sitting at that overall rank on our own
+// board. The second half matters: this league's replacement level makes RB25-40 worth
+// almost nothing in points-above-replacement, but the room still spends rounds 5-8 on
+// them, because it drafts to ADP. Valuing them at zero produced simulated rooms that
+// left running backs on the board for rounds after real ones would.
+const V_BY_RANK = P.slice().sort((a, b) => b.v - a.v).map(p => p.v);
+const adpVal = p => {
+  if (p.adp == null) return null;
+  const i = Math.min(V_BY_RANK.length - 1, Math.max(0, Math.round(p.adp) - 1));
+  return V_BY_RANK[i];
+};
+const cpuVal = p => {
+  const c = (p.slotv != null ? p.slotv : p.v) || 0;
+  const m = adpVal(p);
+  return m == null ? c : 0.5 * c + 0.5 * m;
+};
+// Rooms flex a receiver or a back, not a second tight end — and given the choice they
+// take the back. A third RB goes off the board rounds before a fourth WR of equal
+// value, because backs get hurt and nobody wants to be caught short. The weights are
+// what an RB or a WR is worth to a drafter when he lands in the flex.
+const CPU_FLEX = { RB: .84, WR: .66 };
 
 // A drafter is not only filling a lineup, he is building a roster. Depth counts —
 // just less. The weights below say a starting slot is worth full value, a first
 // backup back is worth about half (everyone wants one; backs get hurt), a fourth
 // receiver rather less, and everything after that is bench lottery tickets. This is
 // what stops the CPU taking four receivers before its first running back.
-const CPU_DEPTH = [['RB', .5], ['WR', .34], ['RB', .26], ['WR', .18], ['TE', .12]];
-function lineupValue(players) {
-  const start = SLOTS.filter(s => s !== 'FLEX').map(s => ({ s, w: 1, p: null }));
-  const flex = SLOTS.filter(s => s === 'FLEX').map(() => ({ s: 'FLEX', w: 1, p: null }));
+// Rooms hoard backs: the first backup RB goes off the board like a starter-and-a-half
+// pick in rounds 4-7, well before a fourth receiver. Weight it accordingly.
+const CPU_DEPTH = [['RB', .62], ['WR', .30], ['RB', .34], ['WR', .18], ['TE', .12]];
+// The flex is a real lineup spot but nobody drafts FOR it: a room fills RB2 and WR3
+// first and lets the flex fall out of the depth. At full weight the CPU was reading
+// "fourth receiver into the flex" as exactly as good as "second back into a starting
+// slot" — and in a three-receiver PPR format the receiver usually carried more
+// consensus value, so it took him. That produced 4-WR / 1-RB rosters in round six.
+// And an empty starting slot gets more urgent every round it stays empty. A drafter
+// with one back in round five is not weighing value any more, he is fixing a hole.
+const urgency = round => Math.min(2.0, 1 + 0.18 * Math.max(0, round - 2));
+function lineupValue(players, round = 1) {
+  const u = urgency(round);
+  const start = SLOTS.filter(s => s !== 'FLEX').map(s => ({ s, w: u, p: null }));
+  const flex = SLOTS.filter(s => s === 'FLEX').map(() => ({ s: 'FLEX', w: 0, p: null }));
   const depth = CPU_DEPTH.filter(([s]) => SLOTS.includes(s) || s === 'FLEX')
     .map(([s, w]) => ({ s, w, p: null }));
   const spare = [];
@@ -519,7 +561,8 @@ function lineupValue(players) {
   const left = [];
   for (const pl of spare) {                        // flex outranks any depth slot
     const f = flex.find(x => !x.p);
-    if (f && CPU_FLEX[normPos(pl.p)]) f.p = pl; else left.push(pl);
+    const fw = CPU_FLEX[normPos(pl.p)];
+    if (f && fw) { f.p = pl; f.w = fw; } else left.push(pl);
   }
   for (const pl of left) {
     const spot = depth.find(f => f.s === normPos(pl.p) && !f.p);
@@ -554,6 +597,11 @@ function cpuPick(team, round) {
     if (CAP[pos] && (cnt[pos] || 0) >= CAP[pos]) return false;
     if (bothSkill && pos === 'WR' && nWR >= 2 && nRB === 0) return false;
     if (bothSkill && pos === 'RB' && nRB >= 2 && nWR === 0) return false;
+    // ...and nobody takes a fourth receiver while his RB2 slot is still empty, nor a
+    // fourth back with one receiver. Rooms fill both starting backfield spots and
+    // three receivers before they stack depth at either.
+    if (bothSkill && pos === 'WR' && nWR >= startAt('WR') && nRB < startAt('RB')) return false;
+    if (bothSkill && pos === 'RB' && nRB >= startAt('RB') + 1 && nWR < startAt('WR') - 1) return false;
     return true;
   });
 
@@ -618,13 +666,18 @@ function cpuPick(team, round) {
   });
   if (!pool.length) return null;
 
-  // A human only ever looks at the top of the board, so neither do we.
-  pool.sort((a, b) => a.fp - b.fp);
+  // A human only ever looks at the top of the board, so neither do we — and the
+  // board a room actually drafts off is ADP, not an expert list. ADP is observed
+  // behaviour: it already carries the way real drafters hoard running backs in
+  // rounds 3-8. Rank the shortlist by it, with the expert rank as the fallback for
+  // the few players the ADP feed does not cover.
+  const mkt = p => (p.adp != null ? p.adp : p.fp + 40);
+  pool.sort((a, b) => mkt(a) - mkt(b));
   const shortlist = pool.slice(0, 28);
-  const base = lineupValue(roster);
+  const base = lineupValue(roster, round);
   const scored = shortlist.map((p, i) => ({
     p, i,
-    gain: lineupValue(roster.concat(p)) - base
+    gain: lineupValue(roster.concat(p), round) - base
   }));
 
   const bestGain = Math.max(...scored.map(s => s.gain));

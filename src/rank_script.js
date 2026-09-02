@@ -15,12 +15,23 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const INJ = { Questionable: ['q', 'Q'], Doubtful: ['d', 'D'], Out: ['o', 'OUT'],
               IR: ['o', 'IR'], PUP: ['o', 'PUP'], Sus: ['o', 'SUS'] };
 const TEAM_OFF = DATA.teamsOff || {};
+// How much the team's offense actually predicts THIS position's fantasy finish. Tested on
+// 2025 actuals in Astroworld scoring: top-12 QBs came from top-half offenses 11 times in
+// 12 with zero from the bottom ten (rank correlation +0.48); WRs moderately (+0.28);
+// RBs barely (+0.17 — Achane was RB5 on the #30 offense, Jeanty RB11 on #32); TEs not
+// at all (−0.02). So the chip is full strength for a QB, muted for a WR, and greyed out
+// for a RB or TE so it cannot mislead at a glance.
+const OFF_TRUST = { QB: 'full', WR: 'soft', RB: 'off', TE: 'off' };
 const offCell = p => {
   const t = TEAM_OFF[p.nfl];
   if (!t) return '<span class="offchip none">—</span>';
+  const trust = OFF_TRUST[normPos(p.p)] || 'off';
   // red (0) -> amber (50) -> green (100); oklch keeps the steps perceptually even
   const hue = 25 + (t.off / 100) * 120;
-  return `<span class="offchip" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last">${esc(p.nfl)}</span>`;
+  const why = trust === 'full' ? 'Strong signal for a QB.'
+            : trust === 'soft' ? 'Moderate signal for a WR — target share matters more.'
+            : `Weak signal for a ${normPos(p.p)} — volume beats team quality. Shown for context only.`;
+  return `<span class="offchip ${trust}" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last. ${why}">${esc(p.nfl)}</span>`;
 };
 const mktTag = p => p.mkt
   ? `<span class="mkt ${p.mkt[0] < 0 ? 'dn' : 'up'}" title="Vegas: ${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]} pts vs the projections — ${esc(p.mkt[1])}">$${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]}</span>`
