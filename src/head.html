@@ -224,8 +224,10 @@ thead th:hover{color:var(--on-surface)}
 thead th .ar{opacity:0;font-size:10px}
 thead th[data-dir] .ar{opacity:1;color:var(--primary)}
 /* On right-aligned columns the arrow must not consume layout width, or the header
-   label sits ~9px left of its own numbers. Park it in the cell's right padding. */
-thead th.r{position:relative}
+   label sits ~9px left of its own numbers. Park it in the cell's right padding.
+   NB: do NOT add `position:relative` here — it would override the `position:sticky`
+   above and the header would scroll away. `sticky` is already a positioned value, so
+   it is the containing block for the absolutely positioned arrow. */
 thead th.r .ar{position:absolute;right:4px;top:50%;transform:translateY(-50%)}
 tbody td{padding:11px 14px;border-bottom:1px solid var(--outline-var);font-size:14px;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
