@@ -304,13 +304,13 @@ function drawRoster() {
     const hue = f.p ? f.p.p : (f.slot === 'FLEX' ? '' : f.slot);
     return `<div class="slot ${f.p ? 'on' : ''} ${hue ? 'p-' + hue : ''}">
       <div class="slothead"><span class="slotlabel">${f.slot}</span>
-        ${f.p ? `<span class="slotmeta">${f.p.p}${f.p.posrk ?? ''}</span>` : ''}</div>
+        ${f.p ? `<span class="slotmeta">${f.p.p}${f.p.vpr ?? f.p.posrk ?? ''}</span>` : ''}</div>
       ${f.p ? `<div class="slotname">${esc(f.p.n)}</div>` : `<div class="slotempty">open</div>`}
     </div>`;
   }).join('') + (left.length
     ? `<div class="slot bench on"><div class="slothead"><span class="slotlabel">BENCH</span>
         <span class="slotmeta">${left.length}</span></div>
-       <div class="benchlist">${left.map(b => `<span class="benchchip p-${b.p}">${esc(b.n)}<i>${b.p}${b.posrk ?? ''}</i></span>`).join('')}</div></div>` : '');
+       <div class="benchlist">${left.map(b => `<span class="benchchip p-${b.p}">${esc(b.n)}<i>${b.p}${b.vpr ?? b.posrk ?? ''}</i></span>`).join('')}</div></div>` : '');
   const need = filled.filter(f => !f.p).map(f => f.slot);
   el('rosterNote').innerHTML = need.length
     ? `still need <b>${need.join(' · ')}</b>` : '<b>starting lineup complete</b>';
