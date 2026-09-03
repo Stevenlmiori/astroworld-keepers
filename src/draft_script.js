@@ -5,6 +5,7 @@ const P = DATA.players.map(p => ({ ...p, gap: (p.fp != null && p.ar != null) ? p
   ptsPar: p.ownv,
   off: (DATA.teamsOff && DATA.teamsOff[p.nfl]) ? DATA.teamsOff[p.nfl].off : null,
   spr: p.spr,
+  yr: p.yr,
   // untouched copies of what refresh.py shipped, so 'Balanced' is exact
   v0: p.v, ar0: p.ar, edge0: p.edge, vpr0: p.vpr,
   gap0: (p.fp != null && p.ar != null) ? p.fp - p.ar : null,
@@ -389,6 +390,17 @@ document.querySelectorAll('.wchip').forEach(b => b.addEventListener('click', () 
 
 let ptsMode = 'total';                 // 'total' = season points | 'par' = above replacement
 try { ptsMode = localStorage.getItem('astroworld-ptsmode') === 'par' ? 'par' : 'total'; } catch (e) {}
+// Yahoo's board vs FantasyPros'. A big split means the room you are drafting against
+// is looking at a different player than the national consensus is.
+const yahooCell = p => {
+  if (p.yr == null) return '<span class="gap">—</span>';
+  const d = p.fp == null ? 0 : p.fp - p.yr;      // + means Yahoo likes him more
+  const cls = d >= 15 ? 'up' : d <= -15 ? 'down' : '';
+  const t = p.fp == null ? '' :
+    (d === 0 ? 'Yahoo and FantasyPros agree'
+     : `Yahoo has him ${Math.abs(d)} spots ${d > 0 ? 'higher' : 'lower'} than FantasyPros`);
+  return `<span class="gap ${cls}" title="${t}">${p.yr}</span>`;
+};
 const ptsCell = p => {
   const v = ptsMode === 'par' ? p.ptsPar : p.ptsTot;
   if (v == null) return '—';
@@ -462,10 +474,11 @@ function render() {
       <td class="r num">${ptsCell(p)}</td>
       <td class="r num">${p.adp ? p.adp.toFixed(1) : '—'}</td>
       <td class="r num">${p.fp ?? '—'}</td>
+      <td class="r num">${yahooCell(p)}</td>
       <td class="r num">${p.edge == null ? '—' : `<span class="gap ${p.edge >= 5 ? 'up' : p.edge <= -12 ? 'down' : ''}">${p.edge > 0 ? '+' + p.edge : p.edge}</span>`}</td>
       <td class="r num">${p.bye || '—'}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--on-var)">No players match those filters.</td></tr>`;
+  }).join('') || `<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--on-var)">No players match those filters.</td></tr>`;
   const cur = currentPick();
   el('legend').innerHTML = `<span>${rows.length} shown · ${taken.size} off the board (${KAT.size} kept, ${PICKS.size} drafted)`
     + `${cur ? ` · tapping a row drafts to pick #${cur}` : ''}</span>`;

@@ -254,6 +254,27 @@ Measured over 12 simulated drafts (144 team-drafts), before → after:
 The measurement script lives in the session history, not the repo; the metrics above are
 the acceptance test for any future change to `cpuPick()`.
 
+### Yahoo rankings (`Yahoo` column)
+
+`fetch_yahoo()` pulls Yahoo's own overall preseason rank (`rank_type: "OR"`) from the
+**public read-only** endpoint — no OAuth:
+
+    https://pub-api-ro.fantasysports.yahoo.com/fantasy/v2/game/nfl/players
+        ;sort=AR;start=N;count=25;out=ranks?format=json
+
+25 players per page, walked to 600 (~24 requests, about 6s). 2026-09-02: 573 ranks, and
+**every** player with an ADP inside the draftable range is covered. Shipped as `yr`.
+
+This matters because **the league drafts on Yahoo**, so Yahoo's board is what the room is
+literally looking at — FantasyPros is the national consensus, Yahoo is the one on screen
+during the draft. The cell is tinted where the two disagree by 15+ spots.
+
+Like `fp`, it is a **market ordering and is NOT re-scored for this league's rules**. It
+does not feed Value; it is displayed for context only.
+
+⚠ Adding this column moved every later column one to the right — the narrow-screen
+`nth-child` hides became 4 / 9 / 10 / 11 and the empty-state `colspan` became 12.
+
 ### Source disagreement is now priced (2026-09-02)
 
 The blend was `mean(ESPN_vorp, Sleeper_vorp)`, which treats two sources telling different

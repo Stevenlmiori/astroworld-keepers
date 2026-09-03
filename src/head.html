@@ -466,13 +466,15 @@ footer a{color:var(--primary)}
   .t-keeper thead th:nth-child(4),.t-keeper tbody td:nth-child(4){display:none}
   /* Value board + Draft Room (both use .t-value; checkbox is column 1).
      Order is: 1 chk, 2 Astro#, 3 Player, 4 Pos, 5 Off, 6 Value, 7 Pts,
-     8 ADP, 9 FP rank, 10 Edge, 11 Bye.  Hide Pos (shown inline beside the
-     name), FP rank and Edge — Value, Pts, Off and ADP are what you scan on a phone.
+     8 ADP, 9 FP rank, 10 Yahoo, 11 Edge, 12 Bye.  Hide Pos (shown inline beside
+     the name), FP rank, Yahoo and Edge — Value, Pts, Off and ADP are what you
+     scan on a phone.
      ⚠ These are positional: re-check them whenever a column is added,
      removed or reordered in draft_body.html / rank_body.html. */
   .t-value thead th:nth-child(4),.t-value tbody td:nth-child(4),
   .t-value thead th:nth-child(9),.t-value tbody td:nth-child(9),
-  .t-value thead th:nth-child(10),.t-value tbody td:nth-child(10){display:none}
+  .t-value thead th:nth-child(10),.t-value tbody td:nth-child(10),
+  .t-value thead th:nth-child(11),.t-value tbody td:nth-child(11){display:none}
   th.chkcol,td.chkcol{width:34px;padding-left:9px;padding-right:2px}
   .t-value .mini{display:none}
   /* 513 rows means one long name sets the column width for everybody; cap it so
