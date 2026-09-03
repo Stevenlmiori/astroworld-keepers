@@ -267,7 +267,7 @@ function rowHTML(p) {
     <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
     <td>${pos}</td>
     <td class="r">${offCell(p)}</td>
-    <td class="r num">${Math.round(p.v)}${bar}${mktTag(p)}</td>
+    <td class="r num"><span class="vcell"><span class="vnum">${Math.round(p.v)}</span>${bar}<span class="vmkt">${mktTag(p)}</span></span></td>
     <td class="r num">${ptsCell(p)}</td>
     <td class="r num">${p.adp ? p.adp.toFixed(1) : '—'}</td>
     <td class="r num">${p.fp ?? '—'}</td>
