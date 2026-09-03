@@ -288,6 +288,11 @@ Net effect (2026-09-02): Hall 61.4 → 50.5, Kyren Williams 51.4 → 47.0 — fr
 gap to 3.5, which is what the evidence supports. Board-wide only **11 of 512 players moved
 more than 5 rank spots**, and the top 12 is unchanged.
 
+**Positional rank follows the weighting.** `vpr` (the RB5/WR6 chip) is shipped from the
+balanced sort. `applyWeights()` recomputes it alongside `ar` for any other weighting, and
+restores `vpr0` for balanced — otherwise the POS chip shows one ranking while Astro #
+shows another (Cook RB5 at #12, Achane RB6 at #11).
+
 `spr` ships to the page. The Pts cell shows a **±** and a dotted underline at spread ≥ 25,
 with the numbers in the tooltip — the discount is disclosed, not hidden.
 

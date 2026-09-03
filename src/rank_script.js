@@ -6,7 +6,7 @@ const P = DATA.players.map(p => ({ ...p, gap: (p.fp != null && p.ar != null) ? p
   off: (DATA.teamsOff && DATA.teamsOff[p.nfl]) ? DATA.teamsOff[p.nfl].off : null,
   spr: p.spr,
   // untouched copies of what refresh.py shipped, so 'Balanced' is exact
-  v0: p.v, ar0: p.ar, edge0: p.edge,
+  v0: p.v, ar0: p.ar, edge0: p.edge, vpr0: p.vpr,
   gap0: (p.fp != null && p.ar != null) ? p.fp - p.ar : null,
   pts: (p.bpts != null ? p.bpts : p.pts) }));
 const el = id => document.getElementById(id);
@@ -155,7 +155,7 @@ function applyWeights() {
     // The shipped numbers are what refresh.py computed at full precision. Restore them
     // rather than recomputing from the rounded slotv/ownv, so the default view can
     // never drift a tenth away from the build.
-    for (const p of P) { p.v = p.v0; p.ar = p.ar0; p.edge = p.edge0; p.gap = p.gap0; }
+    for (const p of P) { p.v = p.v0; p.ar = p.ar0; p.edge = p.edge0; p.gap = p.gap0; p.vpr = p.vpr0; }
     paintWeightUI(m); return;
   }
   const w = m.w;
@@ -163,8 +163,14 @@ function applyWeights() {
     p.v = (p.ownv == null || p.slotv == null) ? (p.slotv != null ? p.slotv : (p.ownv || 0))
         : w * p.slotv + (1 - w) * p.ownv;
   }
-  // Astro # is just the board re-ranked by Value.
+  // Astro # is just the board re-ranked by Value...
   [...P].sort((a, b) => b.v - a.v).forEach((p, i) => { p.ar = i + 1; });
+  // ...and the positional rank has to follow it, or the POS chip shows one ranking
+  // while Astro # shows another (RB5/RB6 disagreeing with #11/#12).
+  const seenPos = {};
+  [...P].sort((a, b) => a.ar - b.ar).forEach(p => {
+    seenPos[p.p] = (seenPos[p.p] || 0) + 1; p.vpr = seenPos[p.p];
+  });
   // Edge: value minus the best player still on the board after his ADP. Walk the ADP
   // order backwards carrying a running max — same as refresh.py does.
   P.forEach(p => { p.edge = null; });
