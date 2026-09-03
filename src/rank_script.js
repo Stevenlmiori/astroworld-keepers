@@ -4,6 +4,7 @@ const P = DATA.players.map(p => ({ ...p, gap: (p.fp != null && p.ar != null) ? p
   ptsTot: (p.bpts != null ? p.bpts : p.pts),
   ptsPar: p.ownv,
   off: (DATA.teamsOff && DATA.teamsOff[p.nfl]) ? DATA.teamsOff[p.nfl].off : null,
+  spr: p.spr,
   // untouched copies of what refresh.py shipped, so 'Balanced' is exact
   v0: p.v, ar0: p.ar, edge0: p.edge,
   gap0: (p.fp != null && p.ar != null) ? p.fp - p.ar : null,
@@ -200,8 +201,15 @@ const ptsCell = p => {
     ? (p.ptsTot == null ? '' : `${Math.round(p.ptsTot)} pts projected`)
     : (p.ptsPar == null ? '' : `+${Math.round(p.ptsPar)} over replacement`);
   const note = d >= 3 ? 'projections above consensus' : d <= -3 ? 'projections below consensus' : '';
-  return `<span class="gap ${cls}" title="${[other, note].filter(Boolean).join(' · ')}"
-    >${Math.round(v)}</span>`;
+  // ESPN and Sleeper do not always see the same player. Where they are far apart the
+  // number is a guess between two stories, so flag it rather than hide it.
+  const spr = p.spr;
+  const shaky = spr != null && spr >= 25;
+  const sprNote = spr == null ? '' :
+    `ESPN and Sleeper are ${Math.round(spr)} pts apart on him` +
+    (shaky ? ' — low confidence, already discounted' : '');
+  return `<span class="gap ${cls} ${shaky ? 'shaky' : ''}" title="${[other, note, sprNote].filter(Boolean).join(' · ')}"
+    >${Math.round(v)}${shaky ? '<i class="sprdot">±</i>' : ''}</span>`;
 };
 function applyPtsMode() {
   for (const p of P) p.pts = ptsMode === 'par' ? p.ptsPar : p.ptsTot;

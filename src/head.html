@@ -209,6 +209,9 @@ input[type="search"]{flex:1;min-width:160px;max-width:280px}
 :root:not([data-theme="light"]) .offchip{background:oklch(0.52 0.16 var(--h))}
 @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .offchip{background:oklch(0.62 0.17 var(--h))} }
 .offchip.none{background:var(--sc-high);color:var(--on-var);text-shadow:none}
+/* source-disagreement marker on Pts: the two projection shops are far apart on him */
+.sprdot{font-style:normal;font-size:10px;opacity:.6;margin-left:2px;vertical-align:1px;cursor:help}
+.gap.shaky{text-decoration:underline dotted currentColor 1px;text-underline-offset:3px}
 /* strength by position: QB full colour, WR muted, RB/TE greyed (the signal is noise there) */
 .offchip.soft{opacity:.62}
 .offchip.off{background:var(--sc-high);color:var(--on-var);text-shadow:none;opacity:.7;

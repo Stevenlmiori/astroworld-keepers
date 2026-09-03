@@ -254,6 +254,46 @@ Measured over 12 simulated drafts (144 team-drafts), before → after:
 The measurement script lives in the session history, not the repo; the metrics above are
 the acceptance test for any future change to `cpuPick()`.
 
+### Source disagreement is now priced (2026-09-02)
+
+The blend was `mean(ESPN_vorp, Sleeper_vorp)`, which treats two sources telling different
+stories as if they were a consensus. Breece Hall 2026 was the case that exposed it:
+
+| view of Breece Hall | points |
+|---|---|
+| ESPN (17 gm) — 1163 rush, 52 rec, 440 rec yd, 10.4 TD | **272** |
+| Sleeper (18 gm) — 986 rush, 37 rec, 314 rec yd, 8.0 TD | **211** |
+| Kalshi / DK rushing line | ~202 |
+
+The mean put him at 247 and ranked him above players the other two views had behind him.
+Two corrections now apply, in this order:
+
+**1. The market's weight scales with disagreement.** `source_spread()` measures how far
+apart the two sources are (deviation from each source's own replacement level, so the
+17-vs-18-game difference cancels). `market_adjust()` then interpolates
+`MKT_PULL` 0.50 → 0.90 and `MKT_CAP` 20 → 45 as that spread approaches `SPREAD_FULL`
+(55 pts). Rationale: when the sources agree, the mean is fine and the market only nudges;
+when they disagree, the market is the tiebreaker with money behind it.
+
+**2. A winner's-curse shrink for what the market cannot see.** Kalshi only prices the
+stats it has ladders for — for Hall that is rushing yards, while ESPN also carries him
+15 catches and 2.4 TDs above Sleeper. So `blend_projections()` subtracts
+`SPREAD_SHRINK (0.30) × spread/2` from every blended estimate. This is not a fudge: a
+draft board is consumed by taking the **max** over noisy estimates, and the max of noisy
+estimates is biased upward — the players you reach for are disproportionately the ones
+the model happens to overrate. Shrinking by a player's own uncertainty corrects that bias.
+Players both sources agree on barely move.
+
+Net effect (2026-09-02): Hall 61.4 → 50.5, Kyren Williams 51.4 → 47.0 — from a 10-point
+gap to 3.5, which is what the evidence supports. Board-wide only **11 of 512 players moved
+more than 5 rank spots**, and the top 12 is unchanged.
+
+`spr` ships to the page. The Pts cell shows a **±** and a dotted underline at spread ≥ 25,
+with the numbers in the tooltip — the discount is disclosed, not hidden.
+
+**Do not raise `SPREAD_SHRINK` to "fix" a specific player.** It is a variance penalty, not
+a lever for opinions about individuals.
+
 ### The Off chip is position-aware
 
 Tested on 2025 actuals in Astroworld scoring, team offense predicted fantasy finish
