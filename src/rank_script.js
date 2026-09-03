@@ -6,6 +6,7 @@ const P = DATA.players.map(p => ({ ...p, gap: (p.fp != null && p.ar != null) ? p
   off: (DATA.teamsOff && DATA.teamsOff[p.nfl]) ? DATA.teamsOff[p.nfl].off : null,
   spr: p.spr,
   yr: p.yr,
+  up: p.up, sleeper: p.sleeper, cvorp: p.cvorp, cpts: p.cpts, cjump: p.cjump,
   // untouched copies of what refresh.py shipped, so 'Balanced' is exact
   v0: p.v, ar0: p.ar, edge0: p.edge, vpr0: p.vpr,
   gap0: (p.fp != null && p.ar != null) ? p.fp - p.ar : null,
@@ -35,6 +36,11 @@ const offCell = p => {
             : `Weak signal for a ${normPos(p.p)} — volume beats team quality. Shown for context only.`;
   return `<span class="offchip ${trust}" style="--h:${hue}" title="${esc(p.nfl)} offense ${t.off}/100 — #${t.rank} of 32 by the market · implied ${t.wins} wins · ${Math.round(t.pmost * 100)}% to lead the league in scoring, ${Math.round(t.pleast * 100)}% to finish last. ${why}">${esc(p.nfl)}</span>`;
 };
+// Sleeper: his CEILING is worth far more than a pick at his ADP normally returns.
+// Not a prediction — a flag that you are not paying for the good outcome.
+const upTag = p => p.sleeper
+  ? `<span class="upchip" title="Sleeper — ceiling ≈ ${Math.round(p.cvorp)} value (about ${p.cjump} spots up his own position, ~${Math.round(p.cpts)} pts), which is ${p.up} more than pick ${Math.round(p.adp)} normally returns. Median case is the Value column; this is the upside case.">▲${Math.round(p.up)}</span>`
+  : '';
 const mktTag = p => p.mkt
   ? `<span class="mkt ${p.mkt[0] < 0 ? 'dn' : 'up'}" title="Vegas: ${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]} pts vs the projections — ${esc(p.mkt[1])}">$${p.mkt[0] > 0 ? '+' : ''}${p.mkt[0]}</span>`
   : '';
@@ -196,6 +202,7 @@ document.querySelectorAll('.wchip').forEach(b => b.addEventListener('click', () 
   applyWeights(); applyPtsMode(); redrawAfterWeights();
 }));
 
+let sleepOnly = false;
 let ptsMode = 'total';                 // 'total' = season points | 'par' = above replacement
 try { ptsMode = localStorage.getItem('astroworld-ptsmode') === 'par' ? 'par' : 'total'; } catch (e) {}
 // Yahoo's board vs FantasyPros'. A big split means the room you are drafting against
@@ -243,6 +250,11 @@ function applyPtsMode() {
   const b = el('ptsMode');
   if (b) b.textContent = ptsMode === 'par' ? 'Pts: over replacement' : 'Pts: season total';
 }
+el('sleepBtn').addEventListener('click', () => {
+  sleepOnly = !sleepOnly;
+  el('sleepBtn').setAttribute('aria-pressed', String(sleepOnly));
+  render(); el('tblwrap').scrollTop = 0;
+});
 el('ptsMode').addEventListener('click', () => {
   ptsMode = ptsMode === 'par' ? 'total' : 'par';
   try { localStorage.setItem('astroworld-ptsmode', ptsMode); } catch (e) {}
@@ -264,7 +276,7 @@ function rowHTML(p) {
       title="${esc(p.n)}: ${label} — click to change"
       aria-label="${esc(p.n)}: ${label}">${st === 'mine' ? '★' : ''}</button></td>
     <td class="scorecell num r">${p.ar ?? '—'}</td>
-    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
+    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}${upTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
     <td>${pos}</td>
     <td class="r">${offCell(p)}</td>
     <td class="r num"><span class="vcell"><span class="vnum">${Math.round(p.v)}</span>${bar}<span class="vmkt">${mktTag(p)}</span></span></td>
@@ -281,6 +293,7 @@ let sortK = 'ar', sortDir = 'asc', posF = '', view = '', q = '';
 function render() {
   let rows = P.filter(p =>
     (!posF || (posF === 'FLEX' ? FLEX_POS.has(p.p) : p.p === posF)) &&
+    (!sleepOnly || p.sleeper) &&
     (view === '' || (view === 'mine' ? stateOf(p) === 'mine' : !stateOf(p))) &&
     (!q || p.n.toLowerCase().includes(q) || (p.nfl || '').toLowerCase().includes(q)));
   const dir = sortDir === 'desc' ? -1 : 1;

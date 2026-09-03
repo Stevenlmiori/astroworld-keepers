@@ -38,6 +38,7 @@
       <button class="fchip" data-view="" aria-pressed="true">All</button>
       <button class="fchip" data-view="avail" aria-pressed="false">Available</button>
       <button class="fchip" data-view="mine" aria-pressed="false">My team</button>
+      <button class="fchip" id="sleepBtn" aria-pressed="false" title="Show only players whose ceiling is worth far more than their draft slot normally returns.">▲ Sleepers</button>
       <button class="fchip" id="ptsMode" title="Switch the Pts column between his projected season total (compare within a position) and his points above replacement (compare across positions).">Pts: season total</button>
       <input type="search" id="q" placeholder="Search players…" aria-label="Search players">
       <span class="spacer"></span>
@@ -101,6 +102,8 @@
           <li><span class="ck">Astro #</span><div>This model's overall board — every player re-ranked by <b>Value</b> for this league. Rank 1 is the best pick available.</div></li>
           <li><span class="ck">Off</span><div><b>Team offense, from the market.</b> Kalshi's implied win total for his team, tilted by the real-money books on which team scores the most and the fewest points, scaled 0-100 across the league. Bright green is an elite environment; dark red is a wasteland.
             <span class="hint"><b>Strength depends on the position.</b> Tested on 2025 results in this league's scoring: team offense strongly predicted QB finishes (no top-12 QB came from a bottom-10 offense), moderately predicted WRs, and barely predicted RBs or TEs — Achane was RB5 on the 30th-ranked offense. So the chip is <b>full colour for a QB, muted for a WR, and greyed out for a RB or TE</b>. Use it as a tiebreaker, not a projection. Hover the chip for the numbers.</span></div></li>
+          <li><span class="ck">▲ Sleeper</span><div>His <b>ceiling</b> is worth far more than a pick at his ADP normally returns. The number is the gap — <b>▲41</b> means his upside case is 41 points of value better than what that draft slot usually buys.
+            <span class="hint">Built from how far apart ESPN and Sleeper are on him, floored by his position's own spread, then read off the positional value curve — so it prices scarcity (a QB climbing five spots gains little; a RB gains a lot). Hover a chip for his ceiling in points and how many spots up his position it implies. <b>This is the upside case, not the projection</b> — the Value column is still the median, and a chip is a reason to gamble a late pick, not to reach.</span></div></li>
           <li><span class="ck">Value</span><div>What he is worth <b>as a draft pick</b>: projected points above the last startable player at his position.
             <span class="hint">Compare across positions — a WR at 80 and a QB at 80 are equally good picks. This is what the board sorts, drafts and simulates on. By default it is half projection, half expert consensus; the <b>Value weighting</b> buttons above the table change that mix, and Astro # and Edge move with it.</span></div></li>
           <li><span class="ck">Pts</span><div>Best estimate of the <b>fantasy points he actually scores</b> this season in Astroworld scoring — full PPR, 6-point passing TDs, −2 per INT. ESPN and Sleeper projections blended, 17-game basis. No expert opinion in it.
