@@ -467,10 +467,10 @@ function render() {
         title="${isKeeper ? 'Kept — change in the Keepers block' : gone ? 'Drafted — tap to undo' : 'Tap to draft to the team on the clock'}"
         >${isKeeper ? 'K' : ''}</span></td>
       <td class="scorecell num r">${p.ar ?? '—'}</td>
-      <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}${mktTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
+      <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
       <td><span class="pos p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
       <td class="r">${offCell(p)}</td>
-      <td class="r num">${Math.round(p.v)}<span class="mini"><i style="width:${w}%"></i></span></td>
+      <td class="r num">${Math.round(p.v)}<span class="mini"><i style="width:${w}%"></i></span>${mktTag(p)}</td>
       <td class="r num">${ptsCell(p)}</td>
       <td class="r num">${p.adp ? p.adp.toFixed(1) : '—'}</td>
       <td class="r num">${p.fp ?? '—'}</td>

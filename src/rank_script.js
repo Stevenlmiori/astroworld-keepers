@@ -264,10 +264,10 @@ function rowHTML(p) {
       title="${esc(p.n)}: ${label} — click to change"
       aria-label="${esc(p.n)}: ${label}">${st === 'mine' ? '★' : ''}</button></td>
     <td class="scorecell num r">${p.ar ?? '—'}</td>
-    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}${mktTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
+    <td><span class="pname">${esc(p.n)}</span> <span class="pteam">${esc(p.nfl || '')}</span>${injTag(p)}<span class="posinline p-${p.p}">${p.p}${p.vpr ?? p.posrk ?? ''}</span></td>
     <td>${pos}</td>
     <td class="r">${offCell(p)}</td>
-    <td class="r num">${Math.round(p.v)}${bar}</td>
+    <td class="r num">${Math.round(p.v)}${bar}${mktTag(p)}</td>
     <td class="r num">${ptsCell(p)}</td>
     <td class="r num">${p.adp ? p.adp.toFixed(1) : '—'}</td>
     <td class="r num">${p.fp ?? '—'}</td>

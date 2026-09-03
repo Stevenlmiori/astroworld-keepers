@@ -196,7 +196,7 @@ input[type="search"]{flex:1;min-width:160px;max-width:280px}
 @media (max-width:560px){ .wnote{width:100%} }
 
 /* ---- market (Kalshi) adjustment tag ---- */
-.mkt{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:700;letter-spacing:.03em;
+.mkt{display:inline-block;margin-left:7px;vertical-align:1px;font-size:9.5px;font-weight:700;letter-spacing:.03em;
   padding:1px 5px;border-radius:5px;vertical-align:1px;font-family:"Roboto Mono",ui-monospace,monospace;cursor:help}
 .mkt.dn{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
 .mkt.up{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
@@ -239,7 +239,7 @@ tbody tr.inel{opacity:.5}
 td.r,thead th.r{text-align:right}
 .pname{font-weight:500}
 .pteam{font-size:12px;color:var(--on-var)}
-.posinline{display:none}
+.posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--on-var)}
 .inj{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:700;letter-spacing:.05em;
   padding:1px 5px;border-radius:5px;vertical-align:1px}
 .inj.i-q{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
@@ -487,8 +487,6 @@ footer a{color:var(--primary)}
   .barttl{font-size:16px;line-height:1.15}
   .pagenav a{font-size:12px;padding:6px 9px}
   .bar .wrap{gap:9px;min-height:56px}
-  .posinline{display:inline;margin-left:7px;font-size:11px;font-weight:700;
-    letter-spacing:.03em;color:var(--on-var)}
   /* the NFL abbreviation is the least useful thing here on a phone; the fantasy
      team is what you are scanning for, so give it the width instead */
   .t-keeper tbody td:nth-child(3) .pteam{display:none}
